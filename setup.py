@@ -20,11 +20,15 @@ setup(name='ExtensionClass',
       version = '2.11.0a1',
       url='http://svn.zope.org/ExtensionClass',
       license='ZPL 2.1',
-      description='',
+      description='Metaclass for subclassable extension types',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
-      long_description='',
-      
+      long_description="""\
+This package provides a metaclass that allows classes implemented in
+extension modules to be subclassed in Python.  Unless you need
+ExtensionClasses for legacy applications (e.g. Zope 2), you probably
+want to use Python's new-style classes (available since Python 2.2).""",
+
 	  packages=find_packages('src'),
 	  package_dir={'': 'src'},
 
