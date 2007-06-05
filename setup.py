@@ -23,11 +23,7 @@ setup(name='ExtensionClass',
       description='Metaclass for subclassable extension types',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
-      long_description="""\
-This package provides a metaclass that allows classes implemented in
-extension modules to be subclassed in Python.  Unless you need
-ExtensionClasses for legacy applications (e.g. Zope 2), you probably
-want to use Python's new-style classes (available since Python 2.2).""",
+      long_description=open('README.txt').read(),
 
 	  packages=find_packages('src'),
 	  package_dir={'': 'src'},
@@ -39,6 +35,10 @@ want to use Python's new-style classes (available since Python 2.2).""",
                    Extension("ComputedAttribute._ComputedAttribute",
                              [os.path.join('src', 'ComputedAttribute',
                                            '_ComputedAttribute.c')],
+                             include_dirs=['src']),
+                   Extension("MethodObject._MethodObject",
+                             [os.path.join('src', 'MethodObject',
+                                           '_MethodObject.c')],
                              include_dirs=['src']),
                    ],
       include_package_data=True,
