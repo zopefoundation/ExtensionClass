@@ -17,8 +17,8 @@ import os
 from setuptools import setup, find_packages, Extension
 
 setup(name='ExtensionClass',
-      version = '2.11.0a1',
-      url='http://svn.zope.org/ExtensionClass',
+      version = '2.11.0a2',
+      url='http://cheeseshop.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',
       author='Zope Corporation and Contributors',
