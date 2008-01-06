@@ -17,7 +17,7 @@ import os
 from setuptools import setup, find_packages, Extension
 
 setup(name='ExtensionClass',
-      version = '2.11.0a2',
+      version = '2.11.0dev',
       url='http://cheeseshop.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',
@@ -25,8 +25,8 @@ setup(name='ExtensionClass',
       author_email='zope-dev@zope.org',
       long_description=open('README.txt').read(),
 
-	  packages=find_packages('src'),
-	  package_dir={'': 'src'},
+      packages=find_packages('src'),
+      package_dir={'': 'src'},
 
       ext_modules=[Extension("ExtensionClass._ExtensionClass",
                              [os.path.join('src', 'ExtensionClass',
