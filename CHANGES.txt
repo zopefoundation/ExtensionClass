@@ -1,7 +1,7 @@
 ExtensionClass Changelog
 ========================
 
-2.11.2 (unreleased)
+2.11.2 (2009-08-02)
 -------------------
 
 - Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See 
