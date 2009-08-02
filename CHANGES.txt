@@ -1,7 +1,7 @@
 ExtensionClass Changelog
 ========================
 
-2.11.3 (unreleased)
+2.11.3 (2009-08-02)
 -------------------
 
 - Further 64-bit fixes (Python 2.4 compatibility).
