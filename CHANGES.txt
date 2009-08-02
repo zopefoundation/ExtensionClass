@@ -1,0 +1,14 @@
+ExtensionClass Changelog
+========================
+
+2.11.2 (unreleased)
+-------------------
+
+- Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See 
+  http://www.python.org/dev/peps/pep-0353/ for details.
+
+
+2.11.1 (2009-02-19)
+-------------------
+
+- Initial egg release.

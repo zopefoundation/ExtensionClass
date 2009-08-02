@@ -24,6 +24,12 @@
 static PyObject *str__slotnames__, *copy_reg_slotnames, *__newobj__;
 static PyObject *str__getnewargs__, *str__getstate__;
 
+#if PY_VERSION_HEX < 0x02050000 && !defined(PY_SSIZE_T_MIN)
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#endif
+
 static int
 pickle_setup(void)
 {
@@ -87,7 +93,8 @@ pickle_copy_dict(PyObject *state)
 {
   PyObject *copy, *key, *value;
   char *ckey;
-  int pos = 0, nr;
+  Py_ssize_t pos = 0;
+  Py_ssize_t nr;
 
   copy = PyDict_New();
   if (copy == NULL)
@@ -212,7 +219,7 @@ static int
 pickle_setattrs_from_dict(PyObject *self, PyObject *dict)
 {
   PyObject *key, *value;
-  int pos = 0;
+  Py_ssize_t pos = 0;
   
   if (! PyDict_Check(dict))
     {

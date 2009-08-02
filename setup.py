@@ -11,19 +11,22 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Setup for the Acquisition egg package
+"""Setup for the ExtensionClass egg package
 """
 import os
 from setuptools import setup, find_packages, Extension
 
+README = open('README.txt').read()
+CHANGES = open('CHANGES.txt').read()
+
 setup(name='ExtensionClass',
-      version = '2.11.0dev',
+      version = '2.11.2dev',
       url='http://cheeseshop.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
-      long_description=open('README.txt').read(),
+      long_description='\n\n'.join([README, CHANGES]),
 
       packages=find_packages('src'),
       package_dir={'': 'src'},

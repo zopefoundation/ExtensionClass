@@ -729,7 +729,7 @@ ec_init(PyObject *self, PyObject *args, PyObject *kw)
 static int
 PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
 {
-  int ecflags = 0;
+  Py_ssize_t ecflags = 0;
   PyMethodDef *pure_methods = NULL, *mdef = NULL;
   PyObject *m;
 
@@ -765,7 +765,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
       if (typ->tp_clear)
         {
           /* ExtensionClasses stick there flags in the tp_clear slot */
-          ecflags = (int)(typ->tp_clear);
+          ecflags = (Py_ssize_t)(typ->tp_clear);
 
           /* Some old-style flags were set */
 
