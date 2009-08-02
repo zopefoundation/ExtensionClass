@@ -4,7 +4,7 @@ ExtensionClass Changelog
 2.11.3 (unreleased)
 -------------------
 
-- TBD
+- Further 64-bit fixes (Python 2.4 compatibility).
 
 
 2.11.2 (2009-08-02)
