@@ -1,10 +1,11 @@
 ExtensionClass Changelog
 ========================
 
-2.11.4 (unreleased)
+2.12.0 (unreleased)
 -------------------
 
-- TBD
+- Added support for method cache in ExtensionClass. Patch contributed by
+  Yoshinori K. Okuji. See https://bugs.launchpad.net/zope2/+bug/486182.
 
 
 2.11.3 (2009-08-02)
