@@ -11,7 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Setup for the ExtensionClass egg package
+"""Setup for the ExtensionClass distribution
 """
 import os
 from setuptools import setup, find_packages, Extension
@@ -20,7 +20,7 @@ README = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
 
 setup(name='ExtensionClass',
-      version = '2.12.0dev',
+      version = '2.12.0',
       url='http://pypi.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',

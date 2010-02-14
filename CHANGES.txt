@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.12.0 (unreleased)
+2.12.0 (2010-02-14)
 -------------------
 
 - Removed old build artifacts and some metadata cleanup.
