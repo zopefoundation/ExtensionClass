@@ -20,8 +20,8 @@ README = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
 
 setup(name='ExtensionClass',
-      version = '2.11.4dev',
-      url='http://cheeseshop.python.org/pypi/ExtensionClass',
+      version = '2.12.0dev',
+      url='http://pypi.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',
       author='Zope Corporation and Contributors',

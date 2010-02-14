@@ -1,25 +1,24 @@
-ExtensionClass Changelog
-========================
+Changelog
+=========
 
 2.12.0 (unreleased)
 -------------------
 
+- Removed old build artifacts and some metadata cleanup.
+
 - Added support for method cache in ExtensionClass. Patch contributed by
   Yoshinori K. Okuji. See https://bugs.launchpad.net/zope2/+bug/486182.
-
 
 2.11.3 (2009-08-02)
 -------------------
 
 - Further 64-bit fixes (Python 2.4 compatibility).
 
-
 2.11.2 (2009-08-02)
 -------------------
 
 - Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See 
   http://www.python.org/dev/peps/pep-0353/ for details.
-
 
 2.11.1 (2009-02-19)
 -------------------
