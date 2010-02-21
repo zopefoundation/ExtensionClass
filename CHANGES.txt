@@ -1,9 +1,11 @@
 Changelog
 =========
 
-2.12.1 (unreleased)
+2.13.0 (unreleased)
 -------------------
 
+- Avoid defining ``__getnewargs__`` as not to defeat the ZODB persistent
+  reference optimization. Refs https://bugs.launchpad.net/zope2/+bug/143657.
 
 2.12.0 (2010-02-14)
 -------------------

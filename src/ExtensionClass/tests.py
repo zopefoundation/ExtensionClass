@@ -196,7 +196,9 @@ def test_basic_pickling():
     >>> x = Simple('x', aaa=1, bbb='foo')
 
     >>> x.__getnewargs__()
-    ()
+    Traceback (most recent call last):
+    ...
+    AttributeError: __getnewargs__
 
     >>> print_dict(x.__getstate__())
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
@@ -296,7 +298,9 @@ def test_pickling_w_slots_only():
     >>> x = SubSlotted('x', 'y', 'z')
 
     >>> x.__getnewargs__()
-    ()
+    Traceback (most recent call last):
+    ...
+    AttributeError: __getnewargs__
 
     >>> d, s = x.__getstate__()
     >>> d
@@ -348,7 +352,9 @@ def test_pickling_w_slots():
     >>> x = SubSubSlotted('x', 'y', 'z', aaa=1, bbb='foo')
 
     >>> x.__getnewargs__()
-    ()
+    Traceback (most recent call last):
+    ...
+    AttributeError: __getnewargs__
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
@@ -389,7 +395,9 @@ def test_pickling_w_slots_w_empty_dict():
     >>> x = SubSubSlotted('x', 'y', 'z')
 
     >>> x.__getnewargs__()
-    ()
+    Traceback (most recent call last):
+    ...
+    AttributeError: __getnewargs__
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
