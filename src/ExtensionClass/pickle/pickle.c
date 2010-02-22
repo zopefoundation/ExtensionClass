@@ -329,10 +329,17 @@ pickle___reduce__(PyObject *self)
 {
   PyObject *args=NULL, *bargs=0, *state=NULL;
   int l, i;
-  
-  bargs = PyObject_CallMethodObjArgs(self, str__getnewargs__, NULL);
-  if (bargs == NULL)
-    return NULL;
+
+  /* we no longer require '__getnewargs__' to be defined but use it if it is */
+  PyObject *getnewargs=NULL;
+
+  getnewargs = PyObject_GetAttr(self, str__getnewargs__);
+  if (getnewargs)
+    bargs = PyEval_CallObject(getnewargs, (PyObject *)NULL);
+  else {
+    PyErr_Clear();
+    bargs = PyTuple_New(0);
+  }
 
   l = PyTuple_Size(bargs);
   if (l < 0)
@@ -359,6 +366,7 @@ pickle___reduce__(PyObject *self)
  end:
   Py_XDECREF(bargs);
   Py_XDECREF(args);
+  Py_XDECREF(getnewargs);
 
   return state;
 }
@@ -371,9 +379,7 @@ pickle___reduce__(PyObject *self)
 {"__setstate__", (PyCFunction)pickle___setstate__, METH_O,           \
    pickle___setstate__doc},                                          
 
-#define PICKLE_GETNEWARGS_DEF \
-{"__getnewargs__", (PyCFunction)pickle___getnewargs__, METH_NOARGS,  \
-   pickle___getnewargs__doc},                                        
+#define PICKLE_GETNEWARGS_DEF
 
 #define PICKLE_REDUCE_DEF \
 {"__reduce__", (PyCFunction)pickle___reduce__, METH_NOARGS,          \
