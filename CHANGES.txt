@@ -1,11 +1,13 @@
 Changelog
 =========
 
-2.13.0 (unreleased)
+2.13.0 (2010-02-22)
 -------------------
 
 - Avoid defining ``__getnewargs__`` as not to defeat the ZODB persistent
   reference optimization. Refs https://bugs.launchpad.net/zope2/+bug/143657.
+  In order to take advantage of this optimization, you need to re-save your
+  objects.
 
 2.12.0 (2010-02-14)
 -------------------
