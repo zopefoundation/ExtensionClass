@@ -310,16 +310,6 @@ pickle___setstate__(PyObject *self, PyObject *state)
   return Py_None;
 }
 
-static char pickle___getnewargs__doc[] = 
-"Get arguments to be passed to __new__\n"
-;
-
-static PyObject *
-pickle___getnewargs__(PyObject *self)
-{
-  return PyTuple_New(0);
-}
-
 static char pickle___reduce__doc[] = 
 "Reduce an object to contituent parts for serialization\n"
 ;
