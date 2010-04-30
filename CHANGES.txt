@@ -4,8 +4,9 @@ Changelog
 2.13.1 (unreleased)
 -------------------
 
-- Removed cruft in ``pickle/pickle.c`` related to removed ``__getnewargs__``.
+- Removed undeclared testing dependency on zope.testing.
 
+- Removed cruft in ``pickle/pickle.c`` related to removed ``__getnewargs__``.
 
 2.13.0 (2010-02-22)
 -------------------

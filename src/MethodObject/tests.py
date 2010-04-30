@@ -11,14 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""XXX short summary goes here.
 
-$Id$
-"""
-import unittest
-from zope.testing.doctest import DocTestSuite
-
-def test_xxx():
+def test_methodobject():
     """
     >>> from ExtensionClass import Base
     >>> from MethodObject import Method
@@ -36,12 +30,12 @@ def test_xxx():
     >>> hi = x.hi
     >>> hi(1,2,3,name='spam')
     called bar() (1, 2, 3) {'name': 'spam'}
-    
     """
 
+
 def test_suite():
+    import unittest
+    from doctest import DocTestSuite
     return unittest.TestSuite((
         DocTestSuite(),
         ))
-
-if __name__ == '__main__': unittest.main()

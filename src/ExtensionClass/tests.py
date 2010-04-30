@@ -11,13 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""
-
-$Id$
-"""
 
 from ExtensionClass import *
-import pickle
 
 
 def print_dict(d):
@@ -213,7 +208,8 @@ def test_basic_pickling():
     
     >>> print_dict(state)
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
-    
+
+    >>> import pickle
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -263,7 +259,8 @@ def test_pickling_w_overrides():
     'Custom'
     >>> ax, ay, a
     ('x', 'y', 99)
-    
+
+    >>> import pickle
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -306,7 +303,8 @@ def test_pickling_w_slots_only():
     >>> d
     >>> print_dict(s)
     {'s1': 'x', 's2': 'y', 's3': 'z'}
-    
+
+    >>> import pickle
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -361,7 +359,8 @@ def test_pickling_w_slots():
     {'aaa': 1, 'bbb': 'foo'}
     >>> print_dict(s)
     {'s1': 'x', 's2': 'y', 's3': 'z'}
-    
+
+    >>> import pickle
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -404,7 +403,8 @@ def test_pickling_w_slots_w_empty_dict():
     {}
     >>> print_dict(s)
     {'s1': 'x', 's2': 'y', 's3': 'z'}
-    
+
+    >>> import pickle
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -843,7 +843,7 @@ def test_Basic_gc():
 
 """
 
-from zope.testing.doctest import DocTestSuite
+from doctest import DocTestSuite
 import unittest
 
 def test_suite():
@@ -851,8 +851,3 @@ def test_suite():
         DocTestSuite('ExtensionClass'),
         DocTestSuite(),
         ))
-
-if __name__ == '__main__': unittest.main()
-
-
-

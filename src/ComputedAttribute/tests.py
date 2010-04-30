@@ -16,6 +16,8 @@
 Computed attributes work much like properties:
 
 >>> import math
+>>> from ComputedAttribute import ComputedAttribute
+>>> from ExtensionClass import Base
 >>> class Point(Base):
 ...    def __init__(self, x, y):
 ...        self.x, self.y = x, y
@@ -42,11 +44,14 @@ def test_wrapper_support():
     computed attribute with a level > 0 returns a computed attribute
     with a decremented level.
 
+    >>> from ExtensionClass import Base
     >>> class X(Base):
     ...     pass
 
     >>> x = X()
     >>> x.n = 1
+
+    >>> from ComputedAttribute import ComputedAttribute
     >>> x.n2 = ComputedAttribute(lambda self: self.n*2)
     >>> x.n2
     2
@@ -66,9 +71,7 @@ def test_wrapper_support():
     """
 
 import unittest
-from zope.testing.doctest import DocTestSuite
-from ExtensionClass import Base
-from ComputedAttribute import ComputedAttribute
+from doctest import DocTestSuite
 
 def test_suite():
     return unittest.TestSuite((DocTestSuite(),))
