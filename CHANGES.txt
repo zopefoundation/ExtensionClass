@@ -4,6 +4,7 @@ Changelog
 2.13.2 (unreleased)
 -------------------
 
+- LP #587760: Handle tp_basicsize correctly.
 
 2.13.1 (2010-04-03)
 -------------------

@@ -820,6 +820,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
     typ->tp_base = &NoInstanceDictionaryBaseType;
   else
     typ->tp_base = &BaseType;
+  typ->tp_basicsize += typ->tp_base->tp_basicsize;
 
   if (typ->tp_new == NULL)
     typ->tp_new = PyType_GenericNew; 
@@ -935,24 +936,27 @@ init_ExtensionClass(void)
 
   ExtensionClassType.ob_type = &PyType_Type;
   ExtensionClassType.tp_base = &PyType_Type;
+  ExtensionClassType.tp_basicsize = PyType_Type.tp_basicsize;
   ExtensionClassType.tp_traverse = PyType_Type.tp_traverse;
   ExtensionClassType.tp_clear = PyType_Type.tp_clear;
   
   /* Initialize types: */
   if (PyType_Ready(&ExtensionClassType) < 0)
     return;
-    
+
   BaseType.ob_type = &ExtensionClassType;
   BaseType.tp_base = &PyBaseObject_Type;
+  BaseType.tp_basicsize = PyBaseObject_Type.tp_basicsize;
   BaseType.tp_new = PyType_GenericNew;
-  
+
   if (PyType_Ready(&BaseType) < 0)
     return;
-    
+
   NoInstanceDictionaryBaseType.ob_type = &ExtensionClassType;
   NoInstanceDictionaryBaseType.tp_base = &BaseType;
+  NoInstanceDictionaryBaseType.tp_basicsize = BaseType.tp_basicsize;
   NoInstanceDictionaryBaseType.tp_new = PyType_GenericNew;
-  
+
   if (PyType_Ready(&NoInstanceDictionaryBaseType) < 0)
     return;
   
