@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.13.2 (unreleased)
+2.13.2 (2010-06-16)
 -------------------
 
 - LP #587760: Handle tp_basicsize correctly.
