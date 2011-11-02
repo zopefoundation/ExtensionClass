@@ -152,8 +152,8 @@ Base_getattro(PyObject *obj, PyObject *name)
                           /* CHANGED!
                              If the tp_descr_get of res is of_get, 
                              then call it. */
-
-                          if (PyObject_TypeCheck(res->ob_type,
+                          if ((strcmp(PyString_AsString(name), "__parent__") != 0) &&
+                              PyObject_TypeCheck(res->ob_type,
                                                  &ExtensionClassType)
                               && res->ob_type->tp_descr_get != NULL) {
                             PyObject *tres;
