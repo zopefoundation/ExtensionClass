@@ -20,7 +20,7 @@ README = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
 
 setup(name='ExtensionClass',
-      version = '4.0a1',
+      version = '4.0dev',
       url='http://pypi.python.org/pypi/ExtensionClass',
       license='ZPL 2.1',
       description='Metaclass for subclassable extension types',
