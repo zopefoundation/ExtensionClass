@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.0 (unreleased)
-----------------
+4.0a1 (2011-12-13)
+------------------
 
 - Don't create wrappers when retrieving parent pointers.
 
