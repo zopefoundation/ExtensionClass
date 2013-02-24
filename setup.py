@@ -21,7 +21,7 @@ CHANGES = open('CHANGES.txt').read()
 
 setup(
     name='ExtensionClass',
-    version='4.0',
+    version='4.0.1dev',
     url='http://pypi.python.org/pypi/ExtensionClass',
     license='ZPL 2.1',
     description='Metaclass for subclassable extension types',
