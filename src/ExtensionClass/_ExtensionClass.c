@@ -885,16 +885,16 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
     {
       if (callable->ob_refcnt == 1)
         {
-          Py_XDECREF(((PyMethodObject*)callable)->im_self);
+          Py_XDECREF(PyMethod_GET_SELF((PyMethodObject*)callable));
           Py_INCREF(inst);
-          ((PyMethodObject*)callable)->im_self = inst;
+          PyMethod_SET_SELF((PyMethodObject*)callable, inst);
           Py_INCREF(callable);
           return callable;
         }
       else
         return callable->ob_type->tp_descr_get(
                    callable, inst, 
-                   ((PyMethodObject*)callable)->im_class);
+                   PyMethod_GET_SELF((PyMethodObject*)callable));
     }
   else
     return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
