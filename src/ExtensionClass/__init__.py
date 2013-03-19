@@ -102,4 +102,192 @@ called even when it is retrieved from an instance.
 $Id$
 """
 
-from _ExtensionClass import *
+import copy_reg
+
+
+def of_get(self, inst, type_=None):
+    if not issubclass(type(type_), ExtensionClass):
+        return self
+    if inst is not None:
+        return self.__of__(inst)
+    return self
+
+
+def pmc_init_of(cls):
+    # set up __get__ if __of__ is implemented
+    of = getattr(cls, '__of__', None)
+    if of is not None:
+        cls.__get__ = of_get
+    else:
+        get = getattr(cls, '__get__', None)
+        if get is not None and get.im_func is of_get:
+            del cls.__get__
+
+
+_Base = type('dummy', (), {})
+_NoInstanceDictionaryBase = type('dummy', (), {})
+
+
+def _add_classic_mro(mro, cls):
+    if cls not in mro:
+        mro.append(cls)
+    for base in cls.__bases__:
+        if base not in mro:
+            mro.append(base)
+            _add_classic_mro(mro, base)
+
+
+class ExtensionClass(type):
+    
+    def __new__(cls, name, bases=(), attrs={}):
+        global _Base, _NoInstanceDictionaryBase
+
+        # Make sure we have an ExtensionClass instance as a base
+        if name != 'Base' and not any(isinstance(b, ExtensionClass) for b in bases):
+            bases += (_Base,)
+        if '__slots__' not in attrs and any(issubclass(b, _NoInstanceDictionaryBase) for b in bases):
+            attrs['__slots__'] = []
+
+        # make sure __class_init__ is a class method
+        if '__class_init__' in attrs:
+            attrs['__class_init__'] = classmethod(attrs['__class_init__'])
+        
+        cls = type.__new__(cls, name, bases, attrs)
+
+        # Inherit docstring
+        if not cls.__doc__:
+            cls.__doc__ = super(cls, cls).__doc__
+
+        # set up __get__ if __of__ is implemented
+        pmc_init_of(cls)
+        
+        # call class init method
+        if hasattr(cls, '__class_init__'):
+            cls.__class_init__()
+        return cls
+
+    def __basicnew__(self):
+        """Create a new empty object"""
+        return self.__new__(self)
+
+    def mro(self):
+        """Compute an mro using the 'encapsulated base' scheme"""
+        global _Base, _NoInstanceDictionaryBase
+
+        mro = [self]
+        for base in self.__bases__:
+            if hasattr(base, '__mro__'):
+                for c in base.__mro__:
+                    if c in (_Base, _NoInstanceDictionaryBase, object):
+                        continue
+                    if c in mro:
+                        continue
+                    mro.append(c)
+            else:
+                _add_classic_mro(mro, base)
+
+        if _NoInstanceDictionaryBase in self.__bases__:
+            mro.append(_NoInstanceDictionaryBase)
+        elif self.__name__ != 'Base':
+            mro.append(_Base)
+        mro.append(object)
+        return mro
+
+    def inheritedAttribute(self, name):
+        """Look up an inherited attribute"""
+        return getattr(super(self, self), name)
+
+    def __setattr__(self, name, value):
+        if name not in ('__get__', '__doc__', '__of__'):
+            if name.startswith('__') and name.endswith('__') and name.count('_') == 4:
+                raise TypeError(
+                    "can't set attributes of built-in/extension type '%s.%s' if the "
+                    "attribute name begins and ends with __ and contains only "
+                    "4 _ characters" % (self.__module__, self.__name__))
+        return type.__setattr__(self, name, value)
+
+
+def Base_getattro(self, name):
+    res = object.__getattribute__(self, name)
+    # If it's a descriptor, call it.
+    if isinstance(res, Base):
+        descr_get = getattr(res, '__get__', None)
+        if descr_get is not None:
+            res = descr_get(self, type(self))
+    return res
+
+
+def _slotnames(self):
+    slotnames = copy_reg._slotnames(type(self))
+    return [x for x in slotnames
+               if not x.startswith('_p_') and
+                  not x.startswith('_v_')]
+
+
+def Base__getstate__(self):
+    idict = getattr(self, '__dict__', None)
+    slotnames = _slotnames(self)
+    if idict is not None:
+        d = dict([x for x in idict.items()
+                     if not x[0].startswith('_p_') and
+                        not x[0].startswith('_v_')])
+    else:
+        d = None
+    if slotnames:
+        s = {}
+        for slotname in slotnames:
+            value = getattr(self, slotname, self)
+            if value is not self:
+                s[slotname] = value
+        return d, s
+    return d
+
+
+def Base__setstate__(self, state):
+    """ See IPersistent.
+    """
+    try:
+        inst_dict, slots = state
+    except:
+        inst_dict, slots = state, ()
+    idict = getattr(self, '__dict__', None)
+    if inst_dict is not None:
+        if idict is None:
+            raise TypeError('No instance dict')
+        idict.clear()
+        idict.update(inst_dict)
+    slotnames = _slotnames(self)
+    if slotnames:
+        for k, v in slots.items():
+            setattr(self, k, v)
+
+
+def Base__reduce__(self):
+    gna = getattr(self, '__getnewargs__', lambda: ())
+    return (copy_reg.__newobj__,
+            (type(self),) + gna(), self.__getstate__())
+
+
+class Base(object):
+    __slots__ = ()
+    __metaclass__ = ExtensionClass
+    __getattribute__ = Base_getattro
+    __getstate__ = Base__getstate__
+    __setstate__ = Base__setstate__
+    __reduce__ = Base__reduce__
+
+
+_Base = Base
+
+
+class NoInstanceDictionaryBase(Base):
+    __slots__ = ()
+
+
+_NoInstanceDictionaryBase = NoInstanceDictionaryBase
+
+
+try:
+    from _ExtensionClass import *
+except ImportError:
+    pass

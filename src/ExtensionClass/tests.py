@@ -120,7 +120,7 @@ def proper_error_on_deleattr():
     >>> a.foo()
     Traceback (most recent call last):
     ...
-    AttributeError: gee
+    AttributeError: 'A' object has no attribute 'gee'
     
     >>> a.bar()
     Traceback (most recent call last):
@@ -138,7 +138,7 @@ def test_NoInstanceDictionaryBase():
     >>> B().__dict__
     Traceback (most recent call last):
     ...
-    AttributeError: This object has no __dict__
+    AttributeError: 'B' object has no attribute '__dict__'
     >>> class B(NoInstanceDictionaryBase): 
     ...   __slots__ = ('a', 'b')
     ... 
@@ -148,7 +148,7 @@ def test_NoInstanceDictionaryBase():
     >>> b.__dict__
     Traceback (most recent call last):
     ...
-    AttributeError: This object has no __dict__
+    AttributeError: 'BB' object has no attribute '__dict__'
     >>> b.a = 1
     >>> b.b = 2
     >>> b.a
@@ -193,7 +193,7 @@ def test_basic_pickling():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: __getnewargs__
+    AttributeError: 'Simple' object has no attribute '__getnewargs__'
 
     >>> print_dict(x.__getstate__())
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
@@ -297,7 +297,7 @@ def test_pickling_w_slots_only():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: __getnewargs__
+    AttributeError: 'SubSlotted' object has no attribute '__getnewargs__'
 
     >>> d, s = x.__getstate__()
     >>> d
@@ -352,7 +352,7 @@ def test_pickling_w_slots():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: __getnewargs__
+    AttributeError: 'SubSubSlotted' object has no attribute '__getnewargs__'
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
@@ -396,7 +396,7 @@ def test_pickling_w_slots_w_empty_dict():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: __getnewargs__
+    AttributeError: 'SubSubSlotted' object has no attribute '__getnewargs__'
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
@@ -465,15 +465,13 @@ def test_setattr_on_extension_type():
     >>> Base.__foo__
     Traceback (most recent call last):
     ...
-    AttributeError: type object 'ExtensionClass.Base' """ \
+    AttributeError: type object 'Base' """ \
         """has no attribute '__foo__'
 
     >>> del Base.__foo__
     Traceback (most recent call last):
     ...
-    TypeError: can't set attributes of built-in/extension type """ \
-        """'ExtensionClass.Base' if the attribute name begins """ \
-        """and ends with __ and contains only 4 _ characters
+    AttributeError: 'ExtensionClass' object has no attribute '__foo__'
 
     """
 
@@ -831,15 +829,10 @@ def test_Basic_gc():
     >>> a.b = C1()
     >>> a.b.a = a
     >>> a.b.c = C2()
-    >>> thresholds = gc.get_threshold()
-    >>> gc.set_threshold(0)
     >>> ignore = gc.collect()
     >>> del a
     >>> ignored = gc.collect()
     removed
-    >>> ignored > 0
-    True
-    >>> gc.set_threshold(*thresholds)
 
 """
 

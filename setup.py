@@ -14,10 +14,31 @@
 """Setup for the ExtensionClass distribution
 """
 import os
+import platform
 from setuptools import setup, find_packages, Extension
 
 README = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
+
+# PyPy won't build the extension.
+py_impl = getattr(platform, 'python_implementation', lambda: None)
+is_pypy = py_impl() == 'PyPy'
+if is_pypy:
+    ext_modules = []
+else:
+    ext_modules = [Extension("ExtensionClass._ExtensionClass",
+                          [os.path.join('src', 'ExtensionClass',
+                                        '_ExtensionClass.c')],
+                          include_dirs=['src']),
+                Extension("ComputedAttribute._ComputedAttribute",
+                          [os.path.join('src', 'ComputedAttribute',
+                                        '_ComputedAttribute.c')],
+                          include_dirs=['src']),
+                Extension("MethodObject._MethodObject",
+                          [os.path.join('src', 'MethodObject',
+                                        '_MethodObject.c')],
+                          include_dirs=['src']),
+                ]
 
 setup(
     name='ExtensionClass',
@@ -42,19 +63,7 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
-    ext_modules=[Extension("ExtensionClass._ExtensionClass",
-                           [os.path.join('src', 'ExtensionClass',
-                                         '_ExtensionClass.c')],
-                           include_dirs=['src']),
-                 Extension("ComputedAttribute._ComputedAttribute",
-                           [os.path.join('src', 'ComputedAttribute',
-                                         '_ComputedAttribute.c')],
-                           include_dirs=['src']),
-                 Extension("MethodObject._MethodObject",
-                           [os.path.join('src', 'MethodObject',
-                                         '_MethodObject.c')],
-                           include_dirs=['src']),
-                 ],
+    ext_modules=ext_modules,
     include_package_data=True,
     zip_safe=False,
 )
