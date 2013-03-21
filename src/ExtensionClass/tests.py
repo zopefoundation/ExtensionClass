@@ -138,7 +138,7 @@ def test_NoInstanceDictionaryBase():
     >>> B().__dict__
     Traceback (most recent call last):
     ...
-    AttributeError: 'B' object has no attribute '__dict__'
+    AttributeError: ...
     >>> class B(NoInstanceDictionaryBase): 
     ...   __slots__ = ('a', 'b')
     ... 
@@ -148,7 +148,7 @@ def test_NoInstanceDictionaryBase():
     >>> b.__dict__
     Traceback (most recent call last):
     ...
-    AttributeError: 'BB' object has no attribute '__dict__'
+    AttributeError: ...
     >>> b.a = 1
     >>> b.b = 2
     >>> b.a
@@ -193,7 +193,7 @@ def test_basic_pickling():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: 'Simple' object has no attribute '__getnewargs__'
+    AttributeError: ...
 
     >>> print_dict(x.__getstate__())
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
@@ -297,7 +297,7 @@ def test_pickling_w_slots_only():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: 'SubSlotted' object has no attribute '__getnewargs__'
+    AttributeError: ...
 
     >>> d, s = x.__getstate__()
     >>> d
@@ -352,7 +352,7 @@ def test_pickling_w_slots():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: 'SubSubSlotted' object has no attribute '__getnewargs__'
+    AttributeError: ...
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
@@ -396,7 +396,7 @@ def test_pickling_w_slots_w_empty_dict():
     >>> x.__getnewargs__()
     Traceback (most recent call last):
     ...
-    AttributeError: 'SubSubSlotted' object has no attribute '__getnewargs__'
+    AttributeError: ...
 
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
@@ -465,13 +465,13 @@ def test_setattr_on_extension_type():
     >>> Base.__foo__
     Traceback (most recent call last):
     ...
-    AttributeError: type object 'Base' """ \
-        """has no attribute '__foo__'
+    AttributeError: ...
 
-    >>> del Base.__foo__
-    Traceback (most recent call last):
-    ...
-    AttributeError: 'ExtensionClass' object has no attribute '__foo__'
+    >>> try:
+    ...     del Base.__foo__
+    ... except (AttributeError, TypeError):  # different on pypy
+    ...     print 'error'
+    error
 
     """
 
@@ -836,6 +836,7 @@ def test_Basic_gc():
 
 """
 
+import doctest
 from doctest import DocTestSuite
 import unittest
 

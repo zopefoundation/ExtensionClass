@@ -103,6 +103,7 @@ $Id$
 """
 
 import copy_reg
+import os
 
 
 def of_get(self, inst, type_=None):
@@ -253,7 +254,7 @@ def Base__setstate__(self, state):
     idict = getattr(self, '__dict__', None)
     if inst_dict is not None:
         if idict is None:
-            raise TypeError('No instance dict')
+            raise TypeError('No instance dict')  # pragma no cover
         idict.clear()
         idict.update(inst_dict)
     slotnames = _slotnames(self)
@@ -287,7 +288,8 @@ class NoInstanceDictionaryBase(Base):
 _NoInstanceDictionaryBase = NoInstanceDictionaryBase
 
 
-try:
-    from _ExtensionClass import *
-except ImportError:
-    pass
+if not 'PURE_PYTHON' in os.environ:  # pragma no cover
+    try:
+        from _ExtensionClass import *
+    except ImportError:
+        pass
