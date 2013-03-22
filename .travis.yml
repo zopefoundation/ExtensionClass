@@ -6,6 +6,6 @@ python:
 install:
     - pip install nose
 script:
-    - nosetests --with-doctest --doctest-options=+IGNORE_EXCEPTION_DETAIL
+    - nosetests --with-doctest
 notifications:
     email: false

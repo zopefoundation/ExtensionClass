@@ -117,12 +117,12 @@ def proper_error_on_deleattr():
     ...     del self.gee
     
     >>> a=A()
-    >>> a.foo()
+    >>> a.foo()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: 'A' object has no attribute 'gee'
     
-    >>> a.bar()
+    >>> a.bar()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: 'A' object has no attribute 'gee'
@@ -135,7 +135,7 @@ def test_NoInstanceDictionaryBase():
     """
     >>> class B(NoInstanceDictionaryBase): pass
     ... 
-    >>> B().__dict__
+    >>> B().__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -145,7 +145,7 @@ def test_NoInstanceDictionaryBase():
     >>> class BB(B): pass
     ... 
     >>> b = BB()
-    >>> b.__dict__
+    >>> b.__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -190,7 +190,7 @@ def test_basic_pickling():
     """
     >>> x = Simple('x', aaa=1, bbb='foo')
 
-    >>> x.__getnewargs__()
+    >>> x.__getnewargs__()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -294,7 +294,7 @@ def test_pickling_w_slots_only():
     """
     >>> x = SubSlotted('x', 'y', 'z')
 
-    >>> x.__getnewargs__()
+    >>> x.__getnewargs__()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -349,7 +349,7 @@ def test_pickling_w_slots():
     """
     >>> x = SubSubSlotted('x', 'y', 'z', aaa=1, bbb='foo')
 
-    >>> x.__getnewargs__()
+    >>> x.__getnewargs__()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -393,7 +393,7 @@ def test_pickling_w_slots_w_empty_dict():
     """
     >>> x = SubSubSlotted('x', 'y', 'z')
 
-    >>> x.__getnewargs__()
+    >>> x.__getnewargs__()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
@@ -455,14 +455,14 @@ def test_setattr_on_extension_type():
     1
     0
 
-    >>> Base.__foo__ = 1
+    >>> Base.__foo__ = 1  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     TypeError: can't set attributes of built-in/extension type """ \
         """'ExtensionClass.Base' if the attribute name begins """ \
         """and ends with __ and contains only 4 _ characters
 
-    >>> Base.__foo__
+    >>> Base.__foo__  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
