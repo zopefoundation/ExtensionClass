@@ -277,6 +277,9 @@ class Base(object):
     __setstate__ = Base__setstate__
     __reduce__ = Base__reduce__
 
+    def __new__(cls, *args, **kw):
+        return object.__new__(cls)
+
 
 _Base = Base
 

@@ -833,8 +833,18 @@ def test_Basic_gc():
     >>> del a
     >>> ignored = gc.collect()
     removed
+    """
 
-"""
+def test__init__w_arg():
+    """
+    Traditionally Base's tp_new slot was set to PyType_GenericNew
+    which doesn't validate its arguments, so we need to support
+    that.
+
+    >>> Base('foo', bar='baz')  # doctest: +ELLIPSIS
+    <ExtensionClass.Base object at ...>
+    """
+
 
 import doctest
 from doctest import DocTestSuite
