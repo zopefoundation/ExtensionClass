@@ -101,7 +101,7 @@ called even when it is retrieved from an instance.
 import os
 import sys
 
-if sys.version_info > (3, ):
+if sys.version_info > (3, ):  # pragma: no cover
     import copyreg as copy_reg
 else:
     import copy_reg
