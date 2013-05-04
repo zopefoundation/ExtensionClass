@@ -57,7 +57,7 @@ As a meta-class, ExtensionClass provides the following features:
   ('bar called', 42)
 
   This is for compatability with old code. New code should use super
-  instead.   
+  instead.
 
 The base class, Base, exists mainly to support the __of__ protocol.
 The __of__ protocol is similar to __get__ except that __of__ is called
@@ -67,7 +67,7 @@ class:
 >>> class O(Base):
 ...   def __of__(*a):
 ...      return a
- 
+
 >>> o1 = O()
 >>> o2 = O()
 >>> C.o1 = o1
@@ -87,7 +87,7 @@ called even when it is retrieved from an instance.
 >>> class O(Base):
 ...   def __get__(*a):
 ...      return a
-... 
+...
 >>> o1 = O()
 >>> o2 = O()
 >>> C.o1 = o1
@@ -98,8 +98,6 @@ called even when it is retrieved from an instance.
 1
 >>> int(c.o2 == (o2, c, type(c)))
 1
-  
-$Id$
 """
 
 import copy_reg
