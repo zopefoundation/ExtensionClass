@@ -38,9 +38,7 @@ As a meta-class, ExtensionClass provides the following features:
 
 - Making sure that every instance of the meta-class has Base as a base class:
 
-  >>> class X:
-  ...     __metaclass__ = ExtensionClass
-
+  >>> X = ExtensionClass('X', (), {})
   >>> Base in X.__mro__
   1
 
@@ -276,17 +274,18 @@ def Base__reduce__(self):
             (type(self),) + gna(), self.__getstate__())
 
 
-class Base(object):
-    __slots__ = ()
-    __metaclass__ = ExtensionClass
-    __getattribute__ = Base_getattro
-    __getstate__ = Base__getstate__
-    __setstate__ = Base__setstate__
-    __reduce__ = Base__reduce__
+def Base__new__(cls, *args, **kw):
+    return object.__new__(cls)
 
-    def __new__(cls, *args, **kw):
-        return object.__new__(cls)
 
+Base = ExtensionClass("Base", (object, ), {
+    '__slots__': (),
+    '__getattribute__': Base_getattro,
+    '__getstate__': Base__getstate__,
+    '__setstate__': Base__setstate__,
+    '__reduce__': Base__reduce__,
+    '__new__': Base__new__,
+})
 
 _Base = Base
 

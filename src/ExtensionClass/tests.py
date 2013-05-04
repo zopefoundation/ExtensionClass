@@ -541,9 +541,7 @@ def test_mro():
     classes.   For example, a new-style class always has object as an
     ancestor, even if it isn't listed as a base:
 
-    >>> class O:
-    ...     __metaclass__ = type
-
+    >>> O = type('O', (), {})
     >>> [c.__name__ for c in O.__bases__]
     ['object']
     >>> [c.__name__ for c in O.__mro__]
@@ -551,9 +549,7 @@ def test_mro():
 
     Similarly, Base is always an ancestor of an extension class:
 
-    >>> class E:
-    ...     __metaclass__ = ExtensionClass
-
+    >>> E = ExtensionClass('E', (), {})
     >>> [c.__name__ for c in E.__bases__]
     ['Base']
     >>> [c.__name__ for c in E.__mro__]
@@ -731,10 +727,7 @@ def test___of___w_metaclass_instance():
     >>> class M(ExtensionClass):
     ...     pass
 
-    >>> class X:
-    ...     __metaclass__ = M
-    ...
-
+    >>> X = M('X', (), {})
     >>> class S(X, O):
     ...     pass
 
@@ -762,12 +755,15 @@ def test___of__set_after_creation():
     >>> import ExtensionClass
     >>> class M(ExtensionClass.ExtensionClass):
     ...     "A meta class"
-    >>> class B(ExtensionClass.Base):
-    ...     __metaclass__ = M
-    ...     def __init__(self, name):
-    ...         self.name = name
-    ...     def __repr__(self):
-    ...         return self.name
+    >>> def B__init__(self, name):
+    ...     self.name = name
+    >>> def B__repr__(self):
+    ...     return self.name
+
+    >>> B = M('B', (ExtensionClass.Base, ), {
+    ...     '__init__': B__init__,
+    ...     '__repr__': B__repr__,
+    ... })
 
     >>> B.__class__ is M
     True
