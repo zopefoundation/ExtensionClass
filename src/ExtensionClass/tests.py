@@ -17,9 +17,8 @@ from ExtensionClass import *
 
 def print_dict(d):
     d = d.items()
-    d.sort()
     print('{%s}' % (', '.join(
-        [('%r: %r' % (k, v)) for (k, v) in d]
+        [('%r: %r' % (k, v)) for (k, v) in sorted(d)]
     )))
 
 
@@ -200,8 +199,8 @@ def test_basic_pickling():
     >>> f, (c,), state = x.__reduce__()
     >>> f.__name__
     '__newobj__'
-    >>> f.__module__
-    'copy_reg'
+    >>> f.__module__ in ('copyreg', 'copy_reg')
+    True
     >>> c.__name__
     'Simple'
 
@@ -252,8 +251,8 @@ def test_pickling_w_overrides():
     >>> (f, (c, ax, ay), a) = x.__reduce__()
     >>> f.__name__
     '__newobj__'
-    >>> f.__module__
-    'copy_reg'
+    >>> f.__module__ in ('copy_reg', 'copyreg')
+    True
     >>> c.__name__
     'Custom'
     >>> ax, ay, a

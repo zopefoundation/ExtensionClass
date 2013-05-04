@@ -1,4 +1,5 @@
-import new
+from types import MethodType
+
 from ExtensionClass import Base
 
 
@@ -15,7 +16,7 @@ class Method(Base):
     """
 
     def __of__(self, inst):
-        return new.instancemethod(self, inst)
+        return MethodType(self, inst)
 
 
 try:

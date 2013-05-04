@@ -100,8 +100,13 @@ called even when it is retrieved from an instance.
 1
 """
 
-import copy_reg
 import os
+import sys
+
+if sys.version_info > (3, ):
+    import copyreg as copy_reg
+else:
+    import copy_reg
 
 
 def of_get(self, inst, type_=None):
