@@ -15,6 +15,7 @@
 """
 import os
 import platform
+import sys
 from setuptools import setup, find_packages, Extension
 
 README = open('README.txt').read()
@@ -24,7 +25,8 @@ CHANGES = open('CHANGES.txt').read()
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 is_pypy = py_impl() == 'PyPy'
 is_pure = 'PURE_PYTHON' in os.environ
-if is_pypy or is_pure:
+py3k = sys.version_info >= (3, )
+if is_pypy or is_pure or py3k:
     ext_modules = []
 else:
     ext_modules = [
