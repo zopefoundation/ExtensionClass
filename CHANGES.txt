@@ -1,8 +1,8 @@
 Changelog
 =========
 
-4.1 (unreleased)
-----------------
+4.1a1 (2013-05-04)
+------------------
 
 - Added compatibility with Python 3.2 and 3.3 using the Python reference
   implementation.
