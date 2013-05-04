@@ -4,6 +4,9 @@ Changelog
 4.1 (unreleased)
 ----------------
 
+- Added compatibility with Python 3.2 and 3.3 using the Python reference
+  implementation.
+
 - Add Python reference implementation. Used by default on PyPy.
 
 4.0 (2013-02-24)
