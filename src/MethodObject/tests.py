@@ -20,7 +20,7 @@ def test_methodobject():
 
     >>> class foo(Method):
     ...     def __call__(self, ob, *args, **kw):
-    ...         print 'called', ob, args, kw
+    ...         print('called %s %s %s' % (ob, args, kw))
 
     >>> class bar(Base):
     ...     def __repr__(self):

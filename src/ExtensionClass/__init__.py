@@ -24,8 +24,8 @@ As a meta-class, ExtensionClass provides the following features:
 
   >>> class C(Base):
   ...   def __class_init__(self):
-  ...      print 'class init called'
-  ...      print self.__name__
+  ...      print('class init called')
+  ...      print(self.__name__)
   ...   def bar(self):
   ...      return 'bar called'
   class init called

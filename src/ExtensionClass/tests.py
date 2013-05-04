@@ -18,9 +18,9 @@ from ExtensionClass import *
 def print_dict(d):
     d = d.items()
     d.sort()
-    print '{%s}' % (', '.join(
+    print('{%s}' % (', '.join(
         [('%r: %r' % (k, v)) for (k, v) in d]
-    ))
+    )))
 
 
 def test_mixing():
@@ -41,8 +41,8 @@ def test_mixing():
 
     >>> class C(Base):
     ...   def __class_init__(self):
-    ...      print 'class init called'
-    ...      print self.__name__
+    ...      print('class init called')
+    ...      print(self.__name__)
     ...   def bar(self):
     ...      return 'bar called'
     class init called
@@ -74,20 +74,15 @@ def test_mixing():
 
 def test_class_creation_under_stress():
     """
+    >>> numbers = []
     >>> for i in range(100):
-    ...   class B(Base):
-    ...     print i,
-    ...     if i and i%20 == 0:
-    ...         print
-    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-    21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
-    41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60
-    61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80
-    81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99
+    ...     class B(Base):
+    ...         numbers.append(i)
+    >>> numbers == list(range(100))
+    True
 
     >>> import gc
     >>> x = gc.collect()
-
     """
 
 
@@ -95,7 +90,8 @@ def old_test_add():
     """test_add.py from old EC
 
     >>> class foo(Base):
-    ...     def __add__(self,other): print 'add called'
+    ...     def __add__(self,other):
+    ...         print('add called')
 
     >>> foo()+foo()
     add called
@@ -444,9 +440,9 @@ def test_setattr_on_extension_type():
     """
     >>> for name in 'x', '_x', 'x_', '__x_y__', '___x__', '__x___', '_x_':
     ...     setattr(Base, name, 1)
-    ...     print getattr(Base, name)
+    ...     print(getattr(Base, name))
     ...     delattr(Base, name)
-    ...     print getattr(Base, name, 0)
+    ...     print(getattr(Base, name, 0))
     1
     0
     1
@@ -477,7 +473,7 @@ def test_setattr_on_extension_type():
     >>> try:
     ...     del Base.__foo__
     ... except (AttributeError, TypeError):  # different on pypy
-    ...     print 'error'
+    ...     print('error')
     error
     """
 
@@ -641,11 +637,11 @@ def test_avoiding___init__decoy_w_inheritedAttribute():
 
     >>> class B(Base):
     ...    def __init__(self, a, b):
-    ...       print '__init__', a, b
+    ...       print('__init__ %s %s' % (a, b))
 
     >>> class C(Decoy, B):
     ...    def __init__(self):
-    ...       print 'C init'
+    ...       print('C init')
     ...       C.inheritedAttribute('__init__')(self, 1, 2)
 
     >>> x = C()
@@ -731,7 +727,7 @@ def test___of___w_metaclass_instance():
 
     >>> class O(Base):
     ...     def __of__(self, parent):
-    ...         print '__of__ called on an O'
+    ...         print('__of__ called on an O')
 
     >>> class M(ExtensionClass):
     ...     pass
@@ -785,7 +781,7 @@ def test___of__set_after_creation():
     We define a __of__ method for B after the fact:
 
     >>> def __of__(self, other):
-    ...     print '__of__(%r, %r)' % (self, other)
+    ...     print('__of__(%r, %r)' % (self, other))
     ...     return self
 
     >>> B.__of__ = __of__
@@ -830,7 +826,7 @@ def test_Basic_gc():
     ...
     >>> class C2(Base):
     ...     def __del__(self):
-    ...         print 'removed'
+    ...         print('removed')
     ...
     >>> a=C1()
     >>> a.b = C1()
