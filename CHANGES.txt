@@ -2,7 +2,7 @@ Changelog
 =========
 
 4.1 (unreleased)
-------------------
+----------------
 
 - Add Python reference implementation. Used by default on PyPy.
 
