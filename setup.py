@@ -46,7 +46,7 @@ else:
 
 setup(
     name='ExtensionClass',
-    version='4.1a1',
+    version='4.1a2',
     url='http://pypi.python.org/pypi/ExtensionClass',
     license='ZPL 2.1',
     description='Metaclass for subclassable extension types',
