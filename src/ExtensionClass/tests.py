@@ -597,7 +597,7 @@ def test_mro():
     >>> [c.__name__ for c in EF.__mro__]
     ['EF', 'ND', 'NB', 'NC', 'NA', 'ED', 'EB', 'EA', 'EC', 'Base', 'object']
 
-    >>> class CA:
+    >>> class CA(object):
     ...  pass
     >>> class CB(CA):
     ...  pass
@@ -609,17 +609,17 @@ def test_mro():
     >>> class ECD(Base, CD):
     ...  pass
     >>> [c.__name__ for c in ECD.__mro__]
-    ['ECD', 'CD', 'CB', 'CA', 'CC', 'Base', 'object']
+    ['ECD', 'CD', 'CB', 'CC', 'CA', 'Base', 'object']
 
     >>> class CDE(CD, Base):
     ...  pass
     >>> [c.__name__ for c in CDE.__mro__]
-    ['CDE', 'CD', 'CB', 'CA', 'CC', 'Base', 'object']
+    ['CDE', 'CD', 'CB', 'CC', 'CA', 'Base', 'object']
 
     >>> class CEND(CD, ED, ND):
     ...  pass
     >>> [c.__name__ for c in CEND.__mro__]
-    ['CEND', 'CD', 'CB', 'CA', 'CC', """ \
+    ['CEND', 'CD', 'CB', 'CC', 'CA', """ \
        """'ED', 'EB', 'EA', 'EC', 'ND', 'NB', 'NC', 'NA', 'Base', 'object']
     """
 
