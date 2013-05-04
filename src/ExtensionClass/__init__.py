@@ -137,20 +137,22 @@ def _add_classic_mro(mro, cls):
 
 
 class ExtensionClass(type):
-    
+
     def __new__(cls, name, bases=(), attrs={}):
         global _Base, _NoInstanceDictionaryBase
 
         # Make sure we have an ExtensionClass instance as a base
-        if name != 'Base' and not any(isinstance(b, ExtensionClass) for b in bases):
+        if (name != 'Base' and
+           not any(isinstance(b, ExtensionClass) for b in bases)):
             bases += (_Base,)
-        if '__slots__' not in attrs and any(issubclass(b, _NoInstanceDictionaryBase) for b in bases):
+        if ('__slots__' not in attrs and
+           any(issubclass(b, _NoInstanceDictionaryBase) for b in bases)):
             attrs['__slots__'] = []
 
         # make sure __class_init__ is a class method
         if '__class_init__' in attrs:
             attrs['__class_init__'] = classmethod(attrs['__class_init__'])
-        
+
         cls = type.__new__(cls, name, bases, attrs)
 
         # Inherit docstring
@@ -159,7 +161,7 @@ class ExtensionClass(type):
 
         # set up __get__ if __of__ is implemented
         pmc_init_of(cls)
-        
+
         # call class init method
         if hasattr(cls, '__class_init__'):
             cls.__class_init__()
@@ -198,11 +200,13 @@ class ExtensionClass(type):
 
     def __setattr__(self, name, value):
         if name not in ('__get__', '__doc__', '__of__'):
-            if name.startswith('__') and name.endswith('__') and name.count('_') == 4:
+            if (name.startswith('__') and name.endswith('__') and
+               name.count('_') == 4):
                 raise TypeError(
-                    "can't set attributes of built-in/extension type '%s.%s' if the "
-                    "attribute name begins and ends with __ and contains only "
-                    "4 _ characters" % (self.__module__, self.__name__))
+                    "can't set attributes of built-in/extension type '%s.%s' "
+                    "if the attribute name begins and ends with __ and "
+                    "contains only 4 _ characters" %
+                    (self.__module__, self.__name__))
         return type.__setattr__(self, name, value)
 
 
@@ -219,8 +223,8 @@ def Base_getattro(self, name):
 def _slotnames(self):
     slotnames = copy_reg._slotnames(type(self))
     return [x for x in slotnames
-               if not x.startswith('_p_') and
-                  not x.startswith('_v_')]
+            if not x.startswith('_p_') and
+            not x.startswith('_v_')]
 
 
 def Base__getstate__(self):
@@ -228,8 +232,8 @@ def Base__getstate__(self):
     slotnames = _slotnames(self)
     if idict is not None:
         d = dict([x for x in idict.items()
-                     if not x[0].startswith('_p_') and
-                        not x[0].startswith('_v_')])
+                  if not x[0].startswith('_p_') and
+                  not x[0].startswith('_v_')])
     else:
         d = None
     if slotnames:

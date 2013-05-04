@@ -20,13 +20,14 @@ def print_dict(d):
     d.sort()
     print '{%s}' % (', '.join(
         [('%r: %r' % (k, v)) for (k, v) in d]
-        ))
+    ))
+
 
 def test_mixing():
     """Test working with a classic class
 
-    >>> class Classic: 
-    ...   def x(self): 
+    >>> class Classic:
+    ...   def x(self):
     ...     return 42
 
     >>> class O(Base):
@@ -35,7 +36,7 @@ def test_mixing():
 
     >>> class O2(Classic, O):
     ...   def __of__(*a):
-    ...      return (O2.inheritedAttribute('__of__')(*a), 
+    ...      return (O2.inheritedAttribute('__of__')(*a),
     ...              O2.inheritedAttribute('x')(a[0]))
 
     >>> class C(Base):
@@ -55,25 +56,25 @@ def test_mixing():
 
     Test working with a new style
 
-    >>> class Modern(object): 
-    ...   def x(self): 
+    >>> class Modern(object):
+    ...   def x(self):
     ...     return 42
 
     >>> class O2(Modern, O):
     ...   def __of__(*a):
-    ...      return (O2.inheritedAttribute('__of__')(*a), 
+    ...      return (O2.inheritedAttribute('__of__')(*a),
     ...              O2.inheritedAttribute('x')(a[0]))
 
     >>> o2 = O2()
     >>> c.o2 = o2
     >>> int(c.o2 == ((o2, c), 42))
     1
-
     """
+
 
 def test_class_creation_under_stress():
     """
-    >>> for i in range(100): 
+    >>> for i in range(100):
     ...   class B(Base):
     ...     print i,
     ...     if i and i%20 == 0:
@@ -89,16 +90,17 @@ def test_class_creation_under_stress():
 
     """
 
+
 def old_test_add():
     """test_add.py from old EC
-    
+
     >>> class foo(Base):
     ...     def __add__(self,other): print 'add called'
 
-    
     >>> foo()+foo()
     add called
     """
+
 
 def proper_error_on_deleattr():
     """
@@ -108,42 +110,42 @@ def proper_error_on_deleattr():
 
     Excellent.
     Will it also fix this particularity of ExtensionClass:
-    
-    
+
     >>> class A(Base):
     ...   def foo(self):
     ...     self.gee
     ...   def bar(self):
     ...     del self.gee
-    
+
     >>> a=A()
     >>> a.foo()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: 'A' object has no attribute 'gee'
-    
+
     >>> a.bar()  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: 'A' object has no attribute 'gee'
-    
+
     I.e., the fact that KeyError is raised whereas a normal class would
     raise AttributeError.
     """
 
+
 def test_NoInstanceDictionaryBase():
     """
     >>> class B(NoInstanceDictionaryBase): pass
-    ... 
+    ...
     >>> B().__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
     AttributeError: ...
-    >>> class B(NoInstanceDictionaryBase): 
+    >>> class B(NoInstanceDictionaryBase):
     ...   __slots__ = ('a', 'b')
-    ... 
+    ...
     >>> class BB(B): pass
-    ... 
+    ...
     >>> b = BB()
     >>> b.__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
@@ -155,8 +157,8 @@ def test_NoInstanceDictionaryBase():
     1
     >>> b.b
     2
-    
     """
+
 
 def test__basicnew__():
     """
@@ -164,7 +166,6 @@ def test__basicnew__():
     >>> x.__dict__
     {}
     """
-
 
 
 def cmpattrs(self, other, *attrs):
@@ -176,6 +177,7 @@ def cmpattrs(self, other, *attrs):
             return c
     return 0
 
+
 class Simple(Base):
     def __init__(self, name, **kw):
         self.__name__ = name
@@ -185,6 +187,7 @@ class Simple(Base):
 
     def __cmp__(self, other):
         return cmpattrs(self, other, '__class__', *(self.__dict__.keys()))
+
 
 def test_basic_pickling():
     """
@@ -197,7 +200,7 @@ def test_basic_pickling():
 
     >>> print_dict(x.__getstate__())
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
-    
+
     >>> f, (c,), state = x.__reduce__()
     >>> f.__name__
     '__newobj__'
@@ -205,7 +208,7 @@ def test_basic_pickling():
     'copy_reg'
     >>> c.__name__
     'Simple'
-    
+
     >>> print_dict(state)
     {'__name__': 'x', 'aaa': 1, 'bbb': 'foo'}
 
@@ -222,8 +225,8 @@ def test_basic_pickling():
     >>> x.__setstate__({'z': 1})
     >>> x.__dict__
     {'z': 1}
-
     """
+
 
 class Custom(Simple):
 
@@ -269,23 +272,25 @@ def test_pickling_w_overrides():
     1
     >>> pickle.loads(pickle.dumps(x, 2)) == x
     1
-    
     """
+
 
 class Slotted(Base):
     __slots__ = 's1', 's2', '_p_splat', '_v_eek'
+
     def __init__(self, s1, s2):
         self.s1, self.s2 = s1, s2
         self._v_eek = 1
         self._p_splat = 2
 
+
 class SubSlotted(Slotted):
     __slots__ = 's3', 's4'
+
     def __init__(self, s1, s2, s3):
         Slotted.__init__(self, s1, s2)
         self.s3 = s3
 
-        
     def __cmp__(self, other):
         return cmpattrs(self, other, '__class__', 's1', 's2', 's3', 's4')
 
@@ -315,12 +320,12 @@ def test_pickling_w_slots_only():
     1
 
     >>> x.s4 = 'spam'
-    
+
     >>> d, s = x.__getstate__()
     >>> d
     >>> print_dict(s)
     {'s1': 'x', 's2': 'y', 's3': 'z', 's4': 'spam'}
-    
+
     >>> pickle.loads(pickle.dumps(x)) == x
     1
     >>> pickle.loads(pickle.dumps(x, 0)) == x
@@ -329,8 +334,8 @@ def test_pickling_w_slots_only():
     1
     >>> pickle.loads(pickle.dumps(x, 2)) == x
     1
-
     """
+
 
 class SubSubSlotted(SubSlotted):
 
@@ -339,11 +344,12 @@ class SubSubSlotted(SubSlotted):
         self.__dict__.update(kw)
         self._v_favorite_color = 'blue'
         self._p_foo = 'bar'
-        
+
     def __cmp__(self, other):
         return cmpattrs(self, other,
                         '__class__', 's1', 's2', 's3', 's4',
                         *(self.__dict__.keys()))
+
 
 def test_pickling_w_slots():
     """
@@ -371,7 +377,7 @@ def test_pickling_w_slots():
     1
 
     >>> x.s4 = 'spam'
-    
+
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
     {'aaa': 1, 'bbb': 'foo'}
@@ -388,6 +394,7 @@ def test_pickling_w_slots():
     1
 
     """
+
 
 def test_pickling_w_slots_w_empty_dict():
     """
@@ -415,7 +422,7 @@ def test_pickling_w_slots_w_empty_dict():
     1
 
     >>> x.s4 = 'spam'
-    
+
     >>> d, s = x.__getstate__()
     >>> print_dict(d)
     {}
@@ -430,9 +437,9 @@ def test_pickling_w_slots_w_empty_dict():
     1
     >>> pickle.loads(pickle.dumps(x, 2)) == x
     1
-
     """
-    
+
+
 def test_setattr_on_extension_type():
     """
     >>> for name in 'x', '_x', 'x_', '__x_y__', '___x__', '__x___', '_x_':
@@ -472,8 +479,8 @@ def test_setattr_on_extension_type():
     ... except (AttributeError, TypeError):  # different on pypy
     ...     print 'error'
     error
-
     """
+
 
 def test_mro():
     """ExtensionClass method-resolution order
@@ -539,9 +546,9 @@ def test_mro():
     classes.   For example, a new-style class always has object as an
     ancestor, even if it isn't listed as a base:
 
-    >>> class O: 
+    >>> class O:
     ...     __metaclass__ = type
-    
+
     >>> [c.__name__ for c in O.__bases__]
     ['object']
     >>> [c.__name__ for c in O.__mro__]
@@ -549,14 +556,14 @@ def test_mro():
 
     Similarly, Base is always an ancestor of an extension class:
 
-    >>> class E: 
+    >>> class E:
     ...     __metaclass__ = ExtensionClass
-    
+
     >>> [c.__name__ for c in E.__bases__]
     ['Base']
     >>> [c.__name__ for c in E.__mro__]
     ['E', 'Base', 'object']
-    
+
     Base and object are generally added soley to get a particular meta
     class. They aren't used to provide application functionality and
     really shouldn't be considered when reasoning about where
@@ -625,6 +632,7 @@ def test_mro():
        """'ED', 'EB', 'EA', 'EC', 'ND', 'NB', 'NC', 'NA', 'Base', 'object']
     """
 
+
 def test_avoiding___init__decoy_w_inheritedAttribute():
     """
 
@@ -643,8 +651,8 @@ def test_avoiding___init__decoy_w_inheritedAttribute():
     >>> x = C()
     C init
     __init__ 1 2
-    
     """
+
 
 def test_of_not_called_when_not_accessed_through_EC_instance():
     """
@@ -654,10 +662,10 @@ def test_of_not_called_when_not_accessed_through_EC_instance():
     ...         return self, parent
 
     If I define an EC instance as an attr of an ordinary class:
-    
+
     >>> class O(object):
     ...     eek = Eek()
-    
+
     >>> class C:
     ...     eek = Eek()
 
@@ -679,10 +687,10 @@ def test_of_not_called_when_not_accessed_through_EC_instance():
     True
 
     If I define an EC instance as an attr of an extension class:
-    
+
     >>> class E(Base):
     ...     eek = Eek()
-    
+
 
     I get the instance, without calling __of__, when I get it from
     tha class:
@@ -695,8 +703,8 @@ def test_of_not_called_when_not_accessed_through_EC_instance():
     >>> e = E()
     >>> e.eek == (E.__dict__['eek'], e)
     True
-
     """
+
 
 def test_inheriting___doc__():
     """Old-style ExtensionClass inherited __doc__ from base classes.
@@ -712,8 +720,8 @@ def test_inheriting___doc__():
 
     >>> EE().__doc__
     'eek'
-
     """
+
 
 def test___of___w_metaclass_instance():
     """When looking for extension class instances, need to handle meta classes
@@ -730,7 +738,7 @@ def test___of___w_metaclass_instance():
 
     >>> class X:
     ...     __metaclass__ = M
-    ...     
+    ...
 
     >>> class S(X, O):
     ...     pass
@@ -739,8 +747,8 @@ def test___of___w_metaclass_instance():
     >>> c.s = S()
     >>> c.s
     __of__ called on an O
-
     """
+
 
 def test___of__set_after_creation():
     """We may need to set __of__ after a class is created.
@@ -793,9 +801,9 @@ def test___of__set_after_creation():
     >>> x.y
     __of__(y, x)
     y
-    
+
     Note that there is no harm in calling pmc_init_of multiple times:
-    
+
     >>> ExtensionClass.pmc_init_of(B)
     >>> ExtensionClass.pmc_init_of(B)
     >>> ExtensionClass.pmc_init_of(B)
@@ -809,9 +817,8 @@ def test___of__set_after_creation():
     >>> ExtensionClass.pmc_init_of(B)
     >>> x.y
     y
-    
-
     """
+
 
 def test_Basic_gc():
     """Test to make sure that EC instances participate in GC
@@ -820,11 +827,11 @@ def test_Basic_gc():
     >>> import gc
     >>> class C1(Base):
     ...     pass
-    ... 
+    ...
     >>> class C2(Base):
     ...     def __del__(self):
     ...         print 'removed'
-    ... 
+    ...
     >>> a=C1()
     >>> a.b = C1()
     >>> a.b.a = a
@@ -834,6 +841,7 @@ def test_Basic_gc():
     >>> ignored = gc.collect()
     removed
     """
+
 
 def test__init__w_arg():
     """
@@ -846,12 +854,12 @@ def test__init__w_arg():
     """
 
 
-import doctest
 from doctest import DocTestSuite
 import unittest
+
 
 def test_suite():
     return unittest.TestSuite((
         DocTestSuite('ExtensionClass'),
         DocTestSuite(),
-        ))
+    ))

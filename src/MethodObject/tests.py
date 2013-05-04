@@ -12,6 +12,7 @@
 #
 ##############################################################################
 
+
 def test_methodobject():
     """
     >>> from ExtensionClass import Base
@@ -38,4 +39,4 @@ def test_suite():
     from doctest import DocTestSuite
     return unittest.TestSuite((
         DocTestSuite(),
-        ))
+    ))

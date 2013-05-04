@@ -67,13 +67,12 @@ def test_wrapper_support():
     >>> x.n2 = x.n2
     >>> x.n2.__class__.__name__
     'int'
-    
     """
+
 
 import unittest
 from doctest import DocTestSuite
 
+
 def test_suite():
     return unittest.TestSuite((DocTestSuite(),))
-
-if __name__ == '__main__': unittest.main()
