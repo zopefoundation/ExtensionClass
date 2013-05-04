@@ -122,7 +122,8 @@ def pmc_init_of(cls):
         cls.__get__ = of_get
     else:
         get = getattr(cls, '__get__', None)
-        if get is not None and get.im_func is of_get:
+        if (get is not None and
+           (get is of_get or getattr(get, '__func__', None) is of_get)):
             del cls.__get__
 
 
