@@ -11,3 +11,4 @@ parts
 *.pyo
 *.so
 *.xml
+*.egg-info/
