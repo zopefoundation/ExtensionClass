@@ -4,6 +4,7 @@ Changelog
 4.1a2 (unreleased)
 ------------------
 
+- Added compatibility with Python 3.4.
 
 4.1a1 (2013-05-04)
 ------------------
