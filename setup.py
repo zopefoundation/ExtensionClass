@@ -18,8 +18,11 @@ import platform
 import sys
 from setuptools import setup, find_packages, Extension
 
-README = open('README.txt').read()
-CHANGES = open('CHANGES.txt').read()
+with open('README.rst') as f:
+    README = f.read()
+
+with open('CHANGES.rst') as f:
+    CHANGES = f.read()
 
 # PyPy won't build the extension.
 py_impl = getattr(platform, 'python_implementation', lambda: None)
