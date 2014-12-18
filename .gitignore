@@ -12,3 +12,6 @@ parts
 *.so
 *.xml
 *.egg-info/
+.installed.cfg
+develop-eggs/
+eggs/
