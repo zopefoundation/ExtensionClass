@@ -216,8 +216,8 @@ class ExtensionClass(type):
 
 def Base_getattro(self, name):
     res = object.__getattribute__(self, name)
-    # If it's a descriptor, call it.
-    if isinstance(res, Base):
+    # If it's a descriptor for something besides __parent__, call it.
+    if name != '__parent__' and isinstance(res, Base):
         descr_get = getattr(res, '__get__', None)
         if descr_get is not None:
             res = descr_get(self, type(self))

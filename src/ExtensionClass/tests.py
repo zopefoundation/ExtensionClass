@@ -844,6 +844,32 @@ def test__init__w_arg():
     <ExtensionClass.Base object at ...>
     """
 
+def test__parent__does_not_get_wrapped():
+    """
+    The issue at
+    https://github.com/zopefoundation/ExtensionClass/issues/3
+    describes how commit afb8488 made the C implementation of
+    ExtensionClass.Base not wrap __parent__ objects, but the pure
+    python version was still doing so. Let's make sure that the behaviour
+    is consistent.
+
+    >>> import ExtensionClass
+    >>> class I(ExtensionClass.Base):
+    ...
+    ...     def __init__(self, id):
+    ...         self.id = id
+    ...
+    ...     def __of__(self,o):
+    ...         return 'wrapped'
+    ...
+    ...     def __repr__(self):
+    ...         return self.id
+    ...
+    >>> x = I('a')
+    >>> x.__parent__ = I('b')
+    >>> x.__parent__
+    b
+    """
 
 from doctest import DocTestSuite
 import unittest
