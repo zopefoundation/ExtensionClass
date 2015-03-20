@@ -1,6 +1,12 @@
 Changelog
 =========
 
+4.1.1 (unreleased)
+------------------
+
+- Avoid wrapping ``__parent__`` in pure-Python version.  Matches
+  change made to C version in afb8488.  See issue #3.
+
 4.1 (2014-12-18)
 ------------------
 
