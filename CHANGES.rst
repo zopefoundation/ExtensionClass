@@ -1,7 +1,7 @@
 Changelog
 =========
 
-4.1.1 (unreleased)
+4.1.1 (2015-03-20)
 ------------------
 
 - Avoid wrapping ``__parent__`` in pure-Python version.  Matches
