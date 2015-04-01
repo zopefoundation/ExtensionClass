@@ -39,9 +39,9 @@ def test_mixing():
     ...              O2.inheritedAttribute('x')(a[0]))
 
     >>> class C(Base):
-    ...   def __class_init__(self):
+    ...   def __class_init__(cls):
     ...      print('class init called')
-    ...      print(self.__name__)
+    ...      print(cls.__name__)
     ...   def bar(self):
     ...      return 'bar called'
     class init called
@@ -870,6 +870,24 @@ def test__parent__does_not_get_wrapped():
     >>> x.__parent__
     b
     """
+
+def test_unbound_function_as___class_init___hook():
+    """
+    Zope patches an unbound function as a `__class_init__` hook onto `Persistent`;
+    let's make sure that gets called correctly.
+
+    >>> def InitializeClass(cls):
+    ...     print('InitializeClass called')
+    ...     print(cls.__name__)
+    >>> class A(Base):
+    ...     pass
+    >>> A.__class_init__ = InitializeClass
+    >>> class B(A):
+    ...     pass
+    InitializeClass called
+    B
+    """
+
 
 from doctest import DocTestSuite
 import unittest
