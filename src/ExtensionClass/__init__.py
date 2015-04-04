@@ -153,10 +153,6 @@ class ExtensionClass(type):
            any(issubclass(b, _NoInstanceDictionaryBase) for b in bases)):
             attrs['__slots__'] = []
 
-        # make sure __class_init__ is a class method
-        if '__class_init__' in attrs:
-            attrs['__class_init__'] = classmethod(attrs['__class_init__'])
-
         cls = type.__new__(cls, name, bases, attrs)
 
         # Inherit docstring
@@ -168,7 +164,10 @@ class ExtensionClass(type):
 
         # call class init method
         if hasattr(cls, '__class_init__'):
-            cls.__class_init__()
+            class_init = cls.__class_init__
+            if hasattr(class_init, '__func__'):
+                class_init = class_init.__func__
+            class_init(cls)
         return cls
 
     def __basicnew__(self):
