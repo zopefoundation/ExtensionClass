@@ -1,7 +1,7 @@
 Changelog
 =========
 
-4.1.2 (unreleased)
+4.1.2 (2015-04-03)
 ------------------
 
 - Fix calling of `__class_init__` hook by Python implementation.
