@@ -213,6 +213,11 @@ class ExtensionClass(type):
         return type.__setattr__(self, name, value)
 
 
+# Base and object are always moved to the last two positions
+# in a subclasses mro, no matter how they are declared in the
+# hierarchy. This means the Base_* methods effectively don't have
+# to care or worry about using super(): it's always object.
+
 def Base_getattro(self, name):
     res = object.__getattribute__(self, name)
     # If it's a descriptor for something besides __parent__, call it.
