@@ -13,7 +13,8 @@
 ##############################################################################
 
 from ExtensionClass import *
-
+from doctest import DocTestSuite
+import unittest
 
 def print_dict(d):
     d = d.items()
@@ -888,13 +889,36 @@ def test_unbound_function_as___class_init___hook():
     B
     """
 
+class TestEffectivelyCooperativeBase(unittest.TestCase):
 
-from doctest import DocTestSuite
-import unittest
+    def test___getattribute__cooperative(self):
+        # This is similar to test_mro() but covering a specific
+        # application. The fact that Base and object are *always* moved
+        # to the end of a given class's mro means that even though
+        # the actual implementation of Base.__getattribute__ is non-cooperative
+        # (i.e., in Python, using object.__getattribute__ directly, not super()),
+        # it doesn't matter: everything else in the hierarchy has already been called
+        class YouShallNotPass(Exception):
+            pass
 
+        class NoAttributes(object):
+            def __getattribute__(self, name):
+                raise YouShallNotPass()
+
+        class WithBaseAndNoAttributes(Base, NoAttributes):
+            pass
+
+        # Even though it's declared this way...
+        self.assertEqual(WithBaseAndNoAttributes.__bases__, (Base, NoAttributes))
+        # ... the effective value puts base at the end
+        self.assertEqual([Base, object], WithBaseAndNoAttributes.mro()[-2:])
+
+        # Therefore, we don't get AttributeError, we get our defined exception
+        self.assertRaises(YouShallNotPass, getattr, WithBaseAndNoAttributes(), 'a')
 
 def test_suite():
     return unittest.TestSuite((
         DocTestSuite('ExtensionClass'),
         DocTestSuite(),
+        unittest.makeSuite(TestEffectivelyCooperativeBase),
     ))
