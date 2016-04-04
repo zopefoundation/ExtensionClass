@@ -14,3 +14,7 @@ script:
     - nosetests --doctest-tests
 notifications:
     email: false
+cache:
+  pip: true
+  directories:
+    - eggs/
