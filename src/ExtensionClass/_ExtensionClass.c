@@ -21,7 +21,7 @@ static char _extensionclass_module_documentation[] =
 #define EC PyTypeObject
 
 static PyObject *str__of__, *str__get__, *str__class_init__, *str__init__;
-static PyObject *str__bases__, *str__mro__, *str__new__;
+static PyObject *str__bases__, *str__mro__, *str__new__, *str__parent__;
 
 #define OBJECT(O) ((PyObject *)(O))
 #define TYPE(O) ((PyTypeObject *)(O))
@@ -43,149 +43,36 @@ of_get(PyObject *self, PyObject *inst, PyObject *cls)
 PyObject *
 Base_getattro(PyObject *obj, PyObject *name)
 {
-  /* This is a modified copy of PyObject_GenericGetAttr.
-     See the change note below. */
+    int name_is_parent = 0;
+    PyObject* res = NULL;
+    PyObject* desc_res = NULL;
 
-	PyTypeObject *tp = obj->ob_type;
-	PyObject *descr = NULL;
-	PyObject *res = NULL;
-	descrgetfunc f;
-	long dictoffset;
-	PyObject **dictptr;
+    res = PyObject_GenericGetAttr(obj, name);
+    if (res == NULL) {
+        return NULL;
+    }
 
-	if (!PyString_Check(name)){
-#ifdef Py_USING_UNICODE
-		/* The Unicode to string conversion is done here because the
-		   existing tp_setattro slots expect a string object as name
-		   and we wouldn't want to break those. */
-		if (PyUnicode_Check(name)) {
-			name = PyUnicode_AsEncodedString(name, NULL, NULL);
-			if (name == NULL)
-				return NULL;
-		}
-		else
-#endif
-		{
-			PyErr_SetString(PyExc_TypeError,
-					"attribute name must be string");
-			return NULL;
-		}
-	}
-	else
-		Py_INCREF(name);
+    name_is_parent = PyObject_RichCompareBool(name, str__parent__, Py_EQ);
+    if (name_is_parent == -1) {
+        Py_DECREF(res);
+        return NULL;
+    }
 
-	if (tp->tp_dict == NULL) {
-		if (PyType_Ready(tp) < 0)
-			goto done;
-	}
+    if (name_is_parent == 1) {
+        return res;
+    }
 
-#if !defined(Py_TPFLAGS_HAVE_VERSION_TAG)
-	/* Inline _PyType_Lookup */
-	/* this is not quite _PyType_Lookup anymore */
-	{
-		int i, n;
-		PyObject *mro, *base, *dict;
+    if (!PyObject_TypeCheck(Py_TYPE(res), &ExtensionClassType)) {
+        return res;
+    }
 
-		/* Look in tp_dict of types in MRO */
-		mro = tp->tp_mro;
-		assert(mro != NULL);
-		assert(PyTuple_Check(mro));
-		n = PyTuple_GET_SIZE(mro);
-		for (i = 0; i < n; i++) {
-			base = PyTuple_GET_ITEM(mro, i);
-			if (PyClass_Check(base))
-				dict = ((PyClassObject *)base)->cl_dict;
-			else {
-				assert(PyType_Check(base));
-				dict = ((PyTypeObject *)base)->tp_dict;
-			}
-			assert(dict && PyDict_Check(dict));
-			descr = PyDict_GetItem(dict, name);
-			if (descr != NULL)
-				break;
-		}
-	}
-#else
-    descr = _PyType_Lookup(tp, name);
-#endif
+    if (!Py_TYPE(res)->tp_descr_get) {
+        return res;
+    }
 
-    Py_XINCREF(descr);
-
-	f = NULL;
-	if (descr != NULL &&
-	    PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
-		f = descr->ob_type->tp_descr_get;
-		if (f != NULL && PyDescr_IsData(descr)) {
-			res = f(descr, obj, (PyObject *)obj->ob_type);
-            Py_DECREF(descr);
-			goto done;
-		}
-	}
-
-	/* Inline _PyObject_GetDictPtr */
-	dictoffset = tp->tp_dictoffset;
-	if (dictoffset != 0) {
-		PyObject *dict;
-		if (dictoffset < 0) {
-			int tsize;
-			size_t size;
-
-			tsize = ((PyVarObject *)obj)->ob_size;
-			if (tsize < 0)
-				tsize = -tsize;
-			size = _PyObject_VAR_SIZE(tp, tsize);
-
-			dictoffset += (long)size;
-			assert(dictoffset > 0);
-			assert(dictoffset % SIZEOF_VOID_P == 0);
-		}
-		dictptr = (PyObject **) ((char *)obj + dictoffset);
-		dict = *dictptr;
-		if (dict != NULL) {
-			Py_INCREF(dict);
-			res = PyDict_GetItem(dict, name);
-			if (res != NULL) {
-				Py_INCREF(res);
-				Py_XDECREF(descr);
-				Py_DECREF(dict);
-
-                          /* CHANGED!
-                             If the tp_descr_get of res is of_get, 
-                             then call it. */
-                          if ((strcmp(PyString_AsString(name), "__parent__") != 0) &&
-                              PyObject_TypeCheck(res->ob_type,
-                                                 &ExtensionClassType)
-                              && res->ob_type->tp_descr_get != NULL) {
-                            PyObject *tres;
-                            tres = res->ob_type->tp_descr_get(
-                                                 res, obj, 
-                                                 OBJECT(obj->ob_type));
-                            Py_DECREF(res);
-                            res = tres;
-                          }
-                          goto done;
-			}
-			Py_DECREF(dict);
-		}
-	}
-
-	if (f != NULL) {
-		res = f(descr, obj, (PyObject *)obj->ob_type);
-		Py_DECREF(descr);
-		goto done;
-	}
-
-	if (descr != NULL) {
-		res = descr;
-        /* descr was already increfed above */
-		goto done;
-	}
-
-        /* CHANGED: Just use the name. Don't format. */
-        PyErr_SetObject(PyExc_AttributeError, name);
-  done:
-	Py_DECREF(name);
-	return res;
+    desc_res = Py_TYPE(res)->tp_descr_get(res, obj, (PyObject*)Py_TYPE(obj));
+    Py_DECREF(res);
+    return desc_res;
 }
 
 #include "pickle/pickle.c"
@@ -930,6 +817,7 @@ init_ExtensionClass(void)
   DEFINE_STRING(__bases__);
   DEFINE_STRING(__mro__);
   DEFINE_STRING(__new__);
+  DEFINE_STRING(__parent__);
 #undef DEFINE_STRING
 
   PyExtensionClassCAPI = &TrueExtensionClassCAPI;
