@@ -91,11 +91,7 @@ static EC BaseType = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
         /* tp_getattro       */ (getattrofunc)Base_getattro,
         0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-         | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
-        ),
+        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_VERSION_TAG),
 	"Standard ExtensionClass base type",
         0, 0, 0, 0, 0, 0, 
         Base_methods,
@@ -107,11 +103,7 @@ static EC NoInstanceDictionaryBaseType = {
 	/* tp_name           */ "ExtensionClass."
                                 "NoInstanceDictionaryBase",
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-         | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
-        ),
+        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_VERSION_TAG),
 	"Base types for subclasses without instance dictionaries",
 };
 
@@ -339,9 +331,7 @@ EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
     }
   else if (PyType_Type.tp_setattro(OBJECT(type), name, value) < 0)
     return -1;
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
   PyType_Modified(type);
-#endif
   return 0;
 }
 
@@ -537,9 +527,7 @@ static PyTypeObject ExtensionClassType = {
         /* tp_flags          */ Py_TPFLAGS_DEFAULT
                                 | Py_TPFLAGS_HAVE_GC
                                 | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
                                 | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
                                 ,
 	/* tp_doc            */ "Meta-class for extension classes",
         /* tp_traverse       */ (traverseproc)0,
@@ -732,9 +720,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
               < 0)
             return -1;
         }      
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
       PyType_Modified(typ);
-#endif
     }
   else if (mdef && mdef->ml_name)
     {
@@ -747,9 +733,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
         return -1;
       if (PyDict_SetItemString(typ->tp_dict, mdef->ml_name, m) < 0)
         return -1;
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
       PyType_Modified(typ);
-#endif
     }
 
   if (PyMapping_SetItemString(dict, name, (PyObject*)typ) < 0)  
