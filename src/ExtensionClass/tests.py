@@ -911,7 +911,7 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
         # Even though it's declared this way...
         self.assertEqual(WithBaseAndNoAttributes.__bases__, (Base, NoAttributes))
         # ... the effective value puts base at the end
-        self.assertEqual([Base, object], WithBaseAndNoAttributes.mro()[-2:])
+        self.assertEqual((Base, object), tuple(WithBaseAndNoAttributes.mro()[-2:]))
 
         # Therefore, we don't get AttributeError, we get our defined exception
         self.assertRaises(YouShallNotPass, getattr, WithBaseAndNoAttributes(), 'a')
