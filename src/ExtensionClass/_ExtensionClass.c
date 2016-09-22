@@ -404,28 +404,17 @@ EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
 static PyObject *
 inheritedAttribute(PyTypeObject *self, PyObject *name)
 {
-  int i;
-  PyObject *d, *cls;
+    PyObject* cls = NULL;
+    PyObject* res = NULL;
 
-  for (i = 1; i < PyTuple_GET_SIZE(self->tp_mro); i++)
-    {
-      cls = PyTuple_GET_ITEM(self->tp_mro, i);
-      if (PyType_Check(cls))
-        d = ((PyTypeObject *)cls)->tp_dict;
-      else if (PyClass_Check(cls))
-        d = ((PyClassObject *)cls)->cl_dict;
-      else
-        /* Unrecognized thing, punt */
-        d = NULL;
-      
-      if ((d == NULL) || (PyDict_GetItem(d, name) == NULL))
-        continue;
-                    
-      return PyObject_GetAttr(cls, name);
+    cls = PyObject_CallFunction((PyObject*)&PySuper_Type, "OO", self, self);
+    if (cls == NULL) {
+        return NULL;
     }
 
-  PyErr_SetObject(PyExc_AttributeError, name);
-  return NULL;
+    res = PyObject_GetAttr(cls, name);
+    Py_DECREF(cls);
+    return res;
 }
 
 static PyObject *
