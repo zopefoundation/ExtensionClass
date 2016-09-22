@@ -82,29 +82,96 @@ static struct PyMethodDef Base_methods[] = {
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
 
-
-static EC BaseType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "Base",
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        /* tp_getattro       */ (getattrofunc)Base_getattro,
-        0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_VERSION_TAG),
-	"Standard ExtensionClass base type",
-        0, 0, 0, 0, 0, 0, 
-        Base_methods,
+static PyTypeObject BaseType = {
+    PyObject_HEAD_INIT(NULL)
+    0,                             /* ob_size */
+    "ExtensionClass.Base",         /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    (getattrofunc)Base_getattro,   /* tp_getattro */
+    0,                             /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Standard ExtensionClass base type", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    Base_methods,                  /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    0,                             /* tp_init */
+    0,                             /* tp_alloc */
+    0,                             /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
-static EC NoInstanceDictionaryBaseType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "NoInstanceDictionaryBase",
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_VERSION_TAG),
-	"Base types for subclasses without instance dictionaries",
+static PyTypeObject NoInstanceDictionaryBaseType = {
+    PyObject_HEAD_INIT(NULL)
+    0,                             /* ob_size */
+    "ExtensionClass.NoInstanceDictionaryBase", /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    0,                             /* tp_getattro */
+    0,                             /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Base types for subclasses without instance dictionaries", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    0,                             /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    0,                             /* tp_init */
+    0,                             /* tp_alloc */
+    0,                             /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
 static PyObject *
@@ -501,54 +568,51 @@ static struct PyMethodDef EC_methods[] = {
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
 
-
 static PyTypeObject ExtensionClassType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "ExtensionClass",
-	/* tp_basicsize      */ 0,
-	/* tp_itemsize       */ 0,
-	/* tp_dealloc        */ (destructor)0,
-	/* tp_print          */ (printfunc)0,
-	/* tp_getattr        */ (getattrfunc)0,
-	/* tp_setattr        */ (setattrfunc)0,
-	/* tp_compare        */ (cmpfunc)0,
-	/* tp_repr           */ (reprfunc)0,
-	/* tp_as_number      */ 0,
-	/* tp_as_sequence    */ 0,
-	/* tp_as_mapping     */ 0,
-	/* tp_hash           */ (hashfunc)0,
-	/* tp_call           */ (ternaryfunc)0,
-	/* tp_str            */ (reprfunc)0,
-        /* tp_getattro       */ (getattrofunc)0,
-        /* tp_setattro       */ (setattrofunc)EC_setattro,
-        /* tp_as_buffer      */ 0,
-        /* tp_flags          */ Py_TPFLAGS_DEFAULT
-                                | Py_TPFLAGS_HAVE_GC
-                                | Py_TPFLAGS_BASETYPE
-                                | Py_TPFLAGS_HAVE_VERSION_TAG
-                                ,
-	/* tp_doc            */ "Meta-class for extension classes",
-        /* tp_traverse       */ (traverseproc)0,
-        /* tp_clear          */ (inquiry)0,
-        /* tp_richcompare    */ (richcmpfunc)0,
-        /* tp_weaklistoffset */ (long)0,
-        /* tp_iter           */ (getiterfunc)0,
-        /* tp_iternext       */ (iternextfunc)0,
-        /* tp_methods        */ EC_methods,
-        /* tp_members        */ 0,
-        /* tp_getset         */ 0,
-        /* tp_base           */ 0,
-        /* tp_dict           */ 0, /* internal use */
-        /* tp_descr_get      */ (descrgetfunc)0,
-        /* tp_descr_set      */ (descrsetfunc)0,
-        /* tp_dictoffset     */ 0,
-        /* tp_init           */ (initproc)EC_init,
-        /* tp_alloc          */ (allocfunc)0,
-        /* tp_new            */ (newfunc)EC_new,
-	/* tp_free           */ 0, /* Low-level free-mem routine */
-	/* tp_is_gc          */ (inquiry)0, /* For PyObject_IS_GC */
+    PyObject_HEAD_INIT(NULL)
+    0,                             /* ob_size */
+    "ExtensionClass.ExtensionClass", /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    0,                             /* tp_getattro */
+    (setattrofunc)EC_setattro,     /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_HAVE_GC |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Meta-class for extension classes", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    EC_methods,                    /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    (initproc)EC_init,             /* tp_init */
+    0,                             /* tp_alloc */
+    (newfunc)EC_new,               /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
 static PyObject *
