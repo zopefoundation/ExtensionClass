@@ -83,8 +83,7 @@ static struct PyMethodDef Base_methods[] = {
   };
 
 static PyTypeObject BaseType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "ExtensionClass.Base",         /* tp_name */
     0,                             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -129,8 +128,7 @@ static PyTypeObject BaseType = {
 };
 
 static PyTypeObject NoInstanceDictionaryBaseType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "ExtensionClass.NoInstanceDictionaryBase", /* tp_name */
     0,                             /* tp_basicsize */
     0,                             /* tp_itemsize */
@@ -569,8 +567,7 @@ static struct PyMethodDef EC_methods[] = {
   };
 
 static PyTypeObject ExtensionClassType = {
-    PyObject_HEAD_INIT(NULL)
-    0,                             /* ob_size */
+    PyVarObject_HEAD_INIT(NULL, 0)
     "ExtensionClass.ExtensionClass", /* tp_name */
     0,                             /* tp_basicsize */
     0,                             /* tp_itemsize */
