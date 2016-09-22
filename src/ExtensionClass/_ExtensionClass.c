@@ -18,6 +18,7 @@ static char _extensionclass_module_documentation[] =
 ;
 
 #include "ExtensionClass/ExtensionClass.h"
+#include "_compat.h"
 #define EC PyTypeObject
 
 static PyObject *str__of__, *str__get__, *str__class_init__, *str__init__;
