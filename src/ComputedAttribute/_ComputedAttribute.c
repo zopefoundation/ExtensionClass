@@ -12,6 +12,7 @@
 
  ****************************************************************************/
 #include "ExtensionClass/ExtensionClass.h"
+#include "ExtensionClass/_compat.h"
 
 #define UNLESS(E) if(!(E))
 #define OBJECT(O) ((PyObject*)(O))
@@ -32,7 +33,7 @@ CA__init__(CA *self, PyObject *args)
 
   if (level > 0) 
     {
-      callable=PyObject_CallFunction(OBJECT(self->ob_type), "Oi", 
+      callable=PyObject_CallFunction(OBJECT(Py_TYPE(self)), "Oi", 
 				     callable, level-1);
       UNLESS (callable) return NULL;
       self->level=level;
@@ -53,8 +54,8 @@ static void
 CA_dealloc(CA *self)     
 {
   Py_DECREF(self->callable);
-  Py_DECREF(self->ob_type);
-  PyObject_DEL(self);
+  Py_DECREF(Py_TYPE(self));
+  Py_TYPE(self)->tp_free(OBJECT(self));
 }
 
 static PyObject *
@@ -66,7 +67,7 @@ CA_of(CA *self, PyObject *args)
       return self->callable;
     }
 
-  if (PyString_Check(self->callable))
+  if (NATIVE_CHECK(self->callable))
     {
       /* Special case string as simple alias. */
       PyObject *o;
@@ -85,7 +86,7 @@ static struct PyMethodDef CA_methods[] = {
 };
 
 static PyExtensionClass ComputedAttributeType = {
-  PyObject_HEAD_INIT(NULL) 0,
+  PyVarObject_HEAD_INIT(NULL, 0)
   "ComputedAttribute", sizeof(CA),
   0,
   (destructor)CA_dealloc,
@@ -99,19 +100,60 @@ static struct PyMethodDef methods[] = {
   {NULL,		NULL}
 };
 
-void
-init_ComputedAttribute(void)
+#ifdef PY3K
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "_ComputedAttribute",                   /* m_name */
+    "Provide ComputedAttribute\n\n",        /* m_doc */
+    -1,                                     /* m_size */
+    methods,                                /* m_methods */
+    NULL,                                   /* m_reload */
+    NULL,                                   /* m_traverse */
+    NULL,                                   /* m_clear */
+    NULL,                                   /* m_free */
+};
+#endif
+
+
+static PyObject*
+module_init(void)
 {
   PyObject *m, *d;
 
-  UNLESS(ExtensionClassImported) return;
+  UNLESS(ExtensionClassImported) return NULL;
   
-  /* Create the module and add the functions */
-  m = Py_InitModule4("_ComputedAttribute", methods,
-	   "Provide Computed Attributes\n\n"
-	   "$Id$\n",
-		     OBJECT(NULL),PYTHON_API_VERSION);
+#ifdef PY3K
+  m = PyModule_Create(&moduledef);
+#else
+  m = Py_InitModule3(
+        "_ComputedAttribute",
+        methods,
+        "Provide Computed Attributes\n\n");
+#endif
+
+  if (m == NULL) {
+      return NULL;
+  }
 
   d = PyModule_GetDict(m);
-  PyExtensionClass_Export(d,"ComputedAttribute",ComputedAttributeType);
+  if (d == NULL) {
+      return NULL;
+  }
+
+  PyExtensionClass_Export(d,"ComputedAttribute",ComputedAttributeType)
+
+  return m;
 }
+
+#ifdef PY3K
+PyMODINIT_FUNC PyInit__ComputedAttribute(void)
+{
+    return module_init();
+}
+#else
+PyMODINIT_FUNC init_ComputedAttribute(void)
+{
+    module_init();
+}
+#endif
