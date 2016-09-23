@@ -1,5 +1,6 @@
-from types import MethodType
+import os
 
+from types import MethodType
 from ExtensionClass import Base
 
 
@@ -19,7 +20,8 @@ class Method(Base):
         return MethodType(self, inst)
 
 
-try:
-    from _MethodObject import *
-except:
-    pass
+if 'PURE_PYTHON' not in os.environ:  # pragma no cover
+    try:
+        from ._MethodObject import *
+    except ImportError:
+        pass
