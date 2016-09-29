@@ -372,13 +372,15 @@ EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
   */
   if (! (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) 
     {
-      char *cname;
+      PyObject* as_bytes = convert_name(name);
+      if (as_bytes == NULL) {
+          return -1;
+      }
+
+      char *cname = PyBytes_AS_STRING(as_bytes);
       int l;
 
-      cname = PyString_AsString(name);
-      if (cname == NULL)
-        return -1;
-      l = PyString_GET_SIZE(name);
+      l = PyBytes_GET_SIZE(as_bytes);
       if (l > 4 
           && cname[0] == '_' && cname[1] == '_'
           && cname[l-1] == '_' && cname[l-2] == '_'
