@@ -358,6 +358,33 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
 }
 
 static int
+_is_bad_setattr_name(PyTypeObject* type, PyObject* as_bytes)
+{
+    char *cname = PyBytes_AS_STRING(as_bytes);
+    int l = PyBytes_GET_SIZE(as_bytes);
+
+    if (l < 4) {
+        return 0;
+    }
+
+    if (cname[0] == '_' && cname[1] == '_' && cname[l-1] == '_' && cname[l-2] == '_') {
+        char *c;
+        c = strchr(cname+2, '_');
+        if (c != NULL && (c - cname) >= (l-2)) {
+            PyErr_Format (
+                PyExc_TypeError,
+                "can't set attributes of built-in/extension type '%s' if the "
+                "attribute name begins and ends with __ and contains only "
+                "4 _ characters",
+                type->tp_name
+            );
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int
 EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
 {
   /* We want to allow setting attributes of builti-in types, because
@@ -370,45 +397,29 @@ EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
 
 
   */
-  if (! (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) 
-    {
-      PyObject* as_bytes = convert_name(name);
-      if (as_bytes == NULL) {
-          return -1;
-      }
 
-      char *cname = PyBytes_AS_STRING(as_bytes);
-      int l;
-
-      l = PyBytes_GET_SIZE(as_bytes);
-      if (l > 4 
-          && cname[0] == '_' && cname[1] == '_'
-          && cname[l-1] == '_' && cname[l-2] == '_'
-          )
-        {
-          char *c;
-          
-          c = strchr(cname+2, '_');
-          if (c != NULL && (c - cname) >= (l-2))
-            {
-              PyErr_Format
-                (PyExc_TypeError,
-                 "can't set attributes of built-in/extension type '%s' if the "
-                 "attribute name begins and ends with __ and contains only "
-                 "4 _ characters",
-                 type->tp_name
-                 );
-              return -1;
-            }
+    if (! (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        PyObject* as_bytes = convert_name(name);
+        if (as_bytes == NULL) {
+            return -1;
         }
-      
-      if (PyObject_GenericSetAttr(OBJECT(type), name, value) < 0)
+
+        if (_is_bad_setattr_name(type, as_bytes)) {
+            Py_DECREF(as_bytes);
+            return -1;
+        }
+
+        if (PyObject_GenericSetAttr(OBJECT(type), name, value) < 0) {
+            Py_DECREF(as_bytes);
+            return -1;
+        }
+    }
+    else if (PyType_Type.tp_setattro(OBJECT(type), name, value) < 0) {
         return -1;
     }
-  else if (PyType_Type.tp_setattro(OBJECT(type), name, value) < 0)
-    return -1;
-  PyType_Modified(type);
-  return 0;
+
+    PyType_Modified(type);
+    return 0;
 }
 
 
