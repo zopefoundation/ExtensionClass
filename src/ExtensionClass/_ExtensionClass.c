@@ -856,19 +856,32 @@ TrueExtensionClassCAPI = {
   &ExtensionClassType,
 };
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#ifdef PY3K
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "_ExtensionClass",                      /* m_name */
+    _extensionclass_module_documentation,   /* m_doc */
+    -1,                                     /* m_size */
+    ec_methods,                             /* m_methods */
+    NULL,                                   /* m_reload */
+    NULL,                                   /* m_traverse */
+    NULL,                                   /* m_clear */
+    NULL,                                   /* m_free */
+};
 #endif
-PyMODINIT_FUNC
-init_ExtensionClass(void)
+
+static PyObject*
+module_init(void)
 {
   PyObject *m, *s;
 
-  if (pickle_setup() < 0)
-    return;
+  if (pickle_setup() < 0) {
+    return NULL;
+  }
 
 #define DEFINE_STRING(S) \
-  if(! (str ## S = PyString_FromString(# S))) return
+  if(! (str ## S = NATIVE_FROM_STRING(# S))) return NULL
 
   DEFINE_STRING(__of__);
   DEFINE_STRING(__get__);
@@ -890,7 +903,7 @@ init_ExtensionClass(void)
   
   /* Initialize types: */
   if (PyType_Ready(&ExtensionClassType) < 0)
-    return;
+    return NULL;
 
   Py_TYPE(&BaseType) = &ExtensionClassType;
   BaseType.tp_base = &PyBaseObject_Type;
@@ -898,7 +911,7 @@ init_ExtensionClass(void)
   BaseType.tp_new = PyType_GenericNew;
 
   if (PyType_Ready(&BaseType) < 0)
-    return;
+    return NULL;
 
   Py_TYPE(&NoInstanceDictionaryBaseType) = &ExtensionClassType;
   NoInstanceDictionaryBaseType.tp_base = &BaseType;
@@ -906,27 +919,49 @@ init_ExtensionClass(void)
   NoInstanceDictionaryBaseType.tp_new = PyType_GenericNew;
 
   if (PyType_Ready(&NoInstanceDictionaryBaseType) < 0)
-    return;
+    return NULL;
   
   /* Create the module and add the functions */
+#ifdef PY3K
+  m = PyModule_Create(&moduledef);
+#else
   m = Py_InitModule3("_ExtensionClass", ec_methods,
                      _extensionclass_module_documentation);
+#endif
 
   if (m == NULL)
-    return;
+    return NULL;
 
-  s = PyCObject_FromVoidPtr(PyExtensionClassCAPI, NULL);
+  s = PyCapsule_New(PyExtensionClassCAPI, "ExtensionClass.CAPI2", NULL);
+  if (s == NULL) {
+      return NULL;
+  }
+
   if (PyModule_AddObject(m, "CAPI2", s) < 0)
-    return;
-        
+    return NULL;
+
   /* Add types: */
-  if (PyModule_AddObject(m, "ExtensionClass", 
+  if (PyModule_AddObject(m, "ExtensionClass",
                          (PyObject *)&ExtensionClassType) < 0)
-    return;
+    return NULL;
   if (PyModule_AddObject(m, "Base", (PyObject *)&BaseType) < 0)
-    return;
-  if (PyModule_AddObject(m, "NoInstanceDictionaryBase", 
+    return NULL;
+
+  if (PyModule_AddObject(m, "NoInstanceDictionaryBase",
                          (PyObject *)&NoInstanceDictionaryBaseType) < 0)
-    return;
+      return NULL;
+
+  return m;
 }
 
+#ifdef PY3K
+PyMODINIT_FUNC PyInit__ExtensionClass(void)
+{
+    return module_init();
+}
+#else
+PyMODINIT_FUNC init_ExtensionClass(void)
+{
+    module_init();
+}
+#endif
