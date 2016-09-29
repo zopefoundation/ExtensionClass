@@ -650,7 +650,7 @@ EC_findiattrs_(PyObject *self, char *cname)
 {
   PyObject *name, *r;
   
-  name = PyString_FromString(cname);
+  name = NATIVE_FROM_STRING(cname);
   if (name == NULL)
     return NULL;
   r = ECBaseType->tp_getattro(self, name);
@@ -750,7 +750,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           typ->tp_new = ec_new_for_custom_dealloc;
     }
 
-  typ->ob_type = ECExtensionClassType; 
+  Py_TYPE(typ) = ECExtensionClassType;
 
   if (ecflags & EXTENSIONCLASS_NOINSTDICT_FLAG)
     typ->tp_base = &NoInstanceDictionaryBaseType;
@@ -867,7 +867,7 @@ init_ExtensionClass(void)
 
   PyExtensionClassCAPI = &TrueExtensionClassCAPI;
 
-  ExtensionClassType.ob_type = &PyType_Type;
+  Py_TYPE(&ExtensionClassType) = &PyType_Type;
   ExtensionClassType.tp_base = &PyType_Type;
   ExtensionClassType.tp_basicsize = PyType_Type.tp_basicsize;
   ExtensionClassType.tp_traverse = PyType_Type.tp_traverse;
@@ -877,7 +877,7 @@ init_ExtensionClass(void)
   if (PyType_Ready(&ExtensionClassType) < 0)
     return;
 
-  BaseType.ob_type = &ExtensionClassType;
+  Py_TYPE(&BaseType) = &ExtensionClassType;
   BaseType.tp_base = &PyBaseObject_Type;
   BaseType.tp_basicsize = PyBaseObject_Type.tp_basicsize;
   BaseType.tp_new = PyType_GenericNew;
@@ -885,7 +885,7 @@ init_ExtensionClass(void)
   if (PyType_Ready(&BaseType) < 0)
     return;
 
-  NoInstanceDictionaryBaseType.ob_type = &ExtensionClassType;
+  Py_TYPE(&NoInstanceDictionaryBaseType) = &ExtensionClassType;
   NoInstanceDictionaryBaseType.tp_base = &BaseType;
   NoInstanceDictionaryBaseType.tp_basicsize = BaseType.tp_basicsize;
   NoInstanceDictionaryBaseType.tp_new = PyType_GenericNew;

@@ -25,6 +25,7 @@
 #define INTERN PyUnicode_InternFromString
 #define INTERN_INPLACE PyUnicode_InternInPlace
 #define NATIVE_CHECK_EXACT PyUnicode_CheckExact
+#define NATIVE_FROM_STRING PyUnicode_FromString
 #define NATIVE_FROM_STRING_AND_SIZE PyUnicode_FromStringAndSize
 
 #define Py_TPFLAGS_HAVE_RICHCOMPARE 0
@@ -38,6 +39,7 @@
 #define INTERN PyString_InternFromString
 #define INTERN_INPLACE PyString_InternInPlace
 #define NATIVE_CHECK_EXACT PyString_CheckExact
+#define NATIVE_FROM_STRING PyString_FromString
 #define NATIVE_FROM_STRING_AND_SIZE PyString_FromStringAndSize
 
 #define INT_FROM_LONG(x) PyInt_FromLong(x)
