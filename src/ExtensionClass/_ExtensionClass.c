@@ -774,7 +774,11 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           m = PyDescr_NewMethod(ECBaseType, pure_methods);
           if (! m)
             return -1;
-          m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
+          #ifdef PY3K
+            m = PyInstanceMethod_New((PyObject*) m);
+          #else
+            m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
+          #endif
           if (! m)
             return -1;
           if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m) 
@@ -823,13 +827,24 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
           Py_INCREF(callable);
           return callable;
         }
-      else
-        return callable->ob_type->tp_descr_get(
-                   callable, inst, 
-                   ((PyMethodObject*)callable)->im_class);
+      else {
+          #ifdef PY3K
+            return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
+          #else
+            return PyMethod_New(
+                PyMethod_GET_FUNCTION(callable),
+                inst,
+                PyMethod_GET_CLASS(callable));
+          #endif
+      }
     }
-  else
-    return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
+  else {
+    #ifdef PY3K
+        return PyMethod_New(callable, inst);
+    #else
+        return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
+    #endif
+  }
 }
 
 static struct ExtensionClassCAPIstruct
