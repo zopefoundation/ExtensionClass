@@ -1,10 +1,12 @@
 Changelog
 =========
 
-4.1.3 (unreleased)
+4.2.0 (unreleased)
 ------------------
 
-- TBD
+- Add support for Python 3.5.
+
+- Drop support for Python 2.6, 3.2.
 
 4.1.2 (2015-04-03)
 ------------------
