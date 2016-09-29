@@ -305,6 +305,7 @@ static int
 EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *__class_init__, *r;
+  PyObject* func = NULL;
 
   if (PyType_Type.tp_init(OBJECT(self), args, kw) < 0) 
     return -1; 
@@ -329,18 +330,25 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
       return 0;
     }
 
-  if (! (PyMethod_Check(__class_init__) 
-         && PyMethod_GET_FUNCTION(__class_init__)
-         )
-      )
-    {
+  if (PyFunction_Check(__class_init__)) {
+      func = __class_init__;
+  }
+  else if (PyMethod_Check(__class_init__)) {
+      func = PyMethod_GET_FUNCTION(__class_init__);
+  }
+#ifdef PY3K
+  else if (PyInstanceMethod_Check(__class_init__)) {
+      func = PyInstanceMethod_GET_FUNCTION(__class_init__);
+  }
+#endif
+
+  if (func == NULL) {
       Py_DECREF(__class_init__);
       PyErr_SetString(PyExc_TypeError, "Invalid type for __class_init__");
       return -1;
-    }
+  }
 
-  r = PyObject_CallFunctionObjArgs(PyMethod_GET_FUNCTION(__class_init__),
-                                   OBJECT(self), NULL);
+  r = PyObject_CallFunctionObjArgs(func, OBJECT(self), NULL);
   Py_DECREF(__class_init__);
   if (! r)
     return -1;
