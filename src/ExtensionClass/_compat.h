@@ -29,12 +29,9 @@
 #define NATIVE_FROM_STRING PyUnicode_FromString
 #define NATIVE_FROM_STRING_AND_SIZE PyUnicode_FromStringAndSize
 
-#define Py_TPFLAGS_HAVE_RICHCOMPARE 0
-
 #define INT_FROM_LONG(x) PyLong_FromLong(x)
 #define INT_CHECK(x) PyLong_Check(x)
 #define INT_AS_LONG(x) PyLong_AS_LONG(x)
-#define CAPI_CAPSULE_NAME "persistent.cPersistence.CAPI"
 
 #else
 #define INTERN PyString_InternFromString
