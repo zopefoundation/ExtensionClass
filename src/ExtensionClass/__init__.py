@@ -304,6 +304,6 @@ _NoInstanceDictionaryBase = NoInstanceDictionaryBase
 
 if not 'PURE_PYTHON' in os.environ:  # pragma no cover
     try:
-        from _ExtensionClass import *
+        from ._ExtensionClass import *
     except ImportError:
         pass
