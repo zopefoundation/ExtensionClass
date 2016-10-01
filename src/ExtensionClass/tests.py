@@ -12,6 +12,8 @@
 #
 ##############################################################################
 
+import sys
+
 from ExtensionClass import *
 from doctest import DocTestSuite
 import unittest
@@ -915,6 +917,65 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
 
         # Therefore, we don't get AttributeError, we get our defined exception
         self.assertRaises(YouShallNotPass, getattr, WithBaseAndNoAttributes(), 'a')
+
+class Test_add_classic_mro(unittest.TestCase):
+
+    def _callFUT(self, mro, cls):
+        from ExtensionClass import _add_classic_mro as FUT
+        return FUT(mro, cls)
+
+    def test_w_empty_mro_newstyle_class_no_bases(self):
+
+        class _Class(object):
+            pass
+
+        mro = []
+        self._callFUT(mro, _Class)
+        self.assertEqual(mro, [_Class, object])
+
+    def test_w_empty_mro_newstyle_class_w_bases(self):
+
+        class _Base(object):
+            pass
+
+        class _Derived(_Base):
+            pass
+
+        mro = []
+        self._callFUT(mro, _Derived)
+        self.assertEqual(mro, [_Derived, _Base, object])
+
+    def test_w_empty_mro_newstyle_class_w_diamond_inheritance(self):
+
+        class _Base(object):
+            pass
+
+        class _One(_Base):
+            pass
+
+        class _Another(_Base):
+            pass
+
+        class _Derived(_One, _Another):
+            pass
+
+        mro = []
+        self._callFUT(mro, _Derived)
+        self.assertEqual(mro, [_Derived, _One, _Base, object, _Another])
+
+    @unittest.skipIf(sys.version_info[0] > 2, 'Py3k: no classic classes')
+    def test_w_filled_mro_oldstyle_class_w_bases(self):
+
+        class _Base:
+            pass
+
+        class _Derived(_Base):
+            pass
+
+        already = object()
+        mro = [already]
+        self._callFUT(mro, _Derived)
+        self.assertEqual(mro, [already, _Derived, _Base])
 
 def test_suite():
     return unittest.TestSuite((
