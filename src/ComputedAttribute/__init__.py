@@ -1,3 +1,5 @@
+import os
+
 from ExtensionClass import Base
 
 
@@ -17,7 +19,8 @@ class ComputedAttribute(Base):
         return func(inst)
 
 
-try:
-    from _ComputedAttribute import *
-except:
-    pass
+if 'PURE_PYTHON' not in os.environ:  # pragma no cover
+    try:
+        from ._ComputedAttribute import *
+    except ImportError:
+        pass

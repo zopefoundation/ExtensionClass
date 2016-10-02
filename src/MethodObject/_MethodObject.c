@@ -13,25 +13,45 @@
  ****************************************************************************/
 
 #include "ExtensionClass/ExtensionClass.h"
+#include "ExtensionClass/_compat.h"
 
 static PyObject *
 of(PyObject *self, PyObject *args)
 {
-  PyObject *inst;
+    PyObject *inst;
 
-  if(PyArg_Parse(args,"O",&inst)) return PyECMethod_New(self,inst);
-  else return NULL;
+    if (!PyArg_ParseTuple(args, "O", &inst)) {
+        return NULL;
+    }
+
+    return PyECMethod_New(self, inst);
 }
 
 struct PyMethodDef Method_methods[] = {
-  {"__of__",(PyCFunction)of,0,""},  
+  {"__of__",(PyCFunction)of,METH_VARARGS,""},  
   {NULL,		NULL}		/* sentinel */
 };
 
 static struct PyMethodDef methods[] = {{NULL,	NULL}};
 
-void
-init_MethodObject(void)
+#ifdef PY3K
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "_MethodObject",                            /* m_name */
+    "Method-object mix-in class module\n\n",    /* m_doc */
+    -1,                                         /* m_size */
+    methods,                                    /* m_methods */
+    NULL,                                       /* m_reload */
+    NULL,                                       /* m_traverse */
+    NULL,                                       /* m_clear */
+    NULL,                                       /* m_free */
+};
+#endif
+
+
+static PyObject*
+module_init(void)
 {
   PyObject *m, *d;
   PURE_MIXIN_CLASS(Method,
@@ -46,13 +66,37 @@ init_MethodObject(void)
 	"to implement (or inherit) a __call__ method.\n",
 	Method_methods);
 
-  /* Create the module and add the functions */
-  m = Py_InitModule4("_MethodObject", methods,
-		     "Method-object mix-in class module\n\n"
-		     "$Id$\n",
-		     (PyObject*)NULL,PYTHON_API_VERSION);
+#ifdef PY3K
+  m = PyModule_Create(&moduledef);
+#else
+  m = Py_InitModule3(
+        "_MethodObject",
+        methods,
+		"Method-object mix-in class module\n\n");
+#endif
+
+  if (m == NULL) {
+      return NULL;
+  }
 
   d = PyModule_GetDict(m);
-  PyExtensionClass_Export(d,"Method",MethodType);
+  if (d == NULL) {
+      return NULL;
+  }
+
+  PyExtensionClass_Export(d,"Method",MethodType)
+
+  return m;
 }
 
+#ifdef PY3K
+PyMODINIT_FUNC PyInit__MethodObject(void)
+{
+    return module_init();
+}
+#else
+PyMODINIT_FUNC init_MethodObject(void)
+{
+    module_init();
+}
+#endif

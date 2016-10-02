@@ -18,10 +18,11 @@ static char _extensionclass_module_documentation[] =
 ;
 
 #include "ExtensionClass/ExtensionClass.h"
+#include "_compat.h"
 #define EC PyTypeObject
 
 static PyObject *str__of__, *str__get__, *str__class_init__, *str__init__;
-static PyObject *str__bases__, *str__mro__, *str__new__;
+static PyObject *str__bases__, *str__mro__, *str__new__, *str__parent__;
 
 #define OBJECT(O) ((PyObject *)(O))
 #define TYPE(O) ((PyTypeObject *)(O))
@@ -43,149 +44,36 @@ of_get(PyObject *self, PyObject *inst, PyObject *cls)
 PyObject *
 Base_getattro(PyObject *obj, PyObject *name)
 {
-  /* This is a modified copy of PyObject_GenericGetAttr.
-     See the change note below. */
+    int name_is_parent = 0;
+    PyObject* res = NULL;
+    PyObject* desc_res = NULL;
 
-	PyTypeObject *tp = obj->ob_type;
-	PyObject *descr = NULL;
-	PyObject *res = NULL;
-	descrgetfunc f;
-	long dictoffset;
-	PyObject **dictptr;
+    res = PyObject_GenericGetAttr(obj, name);
+    if (res == NULL) {
+        return NULL;
+    }
 
-	if (!PyString_Check(name)){
-#ifdef Py_USING_UNICODE
-		/* The Unicode to string conversion is done here because the
-		   existing tp_setattro slots expect a string object as name
-		   and we wouldn't want to break those. */
-		if (PyUnicode_Check(name)) {
-			name = PyUnicode_AsEncodedString(name, NULL, NULL);
-			if (name == NULL)
-				return NULL;
-		}
-		else
-#endif
-		{
-			PyErr_SetString(PyExc_TypeError,
-					"attribute name must be string");
-			return NULL;
-		}
-	}
-	else
-		Py_INCREF(name);
+    name_is_parent = PyObject_RichCompareBool(name, str__parent__, Py_EQ);
+    if (name_is_parent == -1) {
+        Py_DECREF(res);
+        return NULL;
+    }
 
-	if (tp->tp_dict == NULL) {
-		if (PyType_Ready(tp) < 0)
-			goto done;
-	}
+    if (name_is_parent == 1) {
+        return res;
+    }
 
-#if !defined(Py_TPFLAGS_HAVE_VERSION_TAG)
-	/* Inline _PyType_Lookup */
-	/* this is not quite _PyType_Lookup anymore */
-	{
-		int i, n;
-		PyObject *mro, *base, *dict;
+    if (!PyObject_TypeCheck(Py_TYPE(res), &ExtensionClassType)) {
+        return res;
+    }
 
-		/* Look in tp_dict of types in MRO */
-		mro = tp->tp_mro;
-		assert(mro != NULL);
-		assert(PyTuple_Check(mro));
-		n = PyTuple_GET_SIZE(mro);
-		for (i = 0; i < n; i++) {
-			base = PyTuple_GET_ITEM(mro, i);
-			if (PyClass_Check(base))
-				dict = ((PyClassObject *)base)->cl_dict;
-			else {
-				assert(PyType_Check(base));
-				dict = ((PyTypeObject *)base)->tp_dict;
-			}
-			assert(dict && PyDict_Check(dict));
-			descr = PyDict_GetItem(dict, name);
-			if (descr != NULL)
-				break;
-		}
-	}
-#else
-    descr = _PyType_Lookup(tp, name);
-#endif
+    if (!Py_TYPE(res)->tp_descr_get) {
+        return res;
+    }
 
-    Py_XINCREF(descr);
-
-	f = NULL;
-	if (descr != NULL &&
-	    PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
-		f = descr->ob_type->tp_descr_get;
-		if (f != NULL && PyDescr_IsData(descr)) {
-			res = f(descr, obj, (PyObject *)obj->ob_type);
-            Py_DECREF(descr);
-			goto done;
-		}
-	}
-
-	/* Inline _PyObject_GetDictPtr */
-	dictoffset = tp->tp_dictoffset;
-	if (dictoffset != 0) {
-		PyObject *dict;
-		if (dictoffset < 0) {
-			int tsize;
-			size_t size;
-
-			tsize = ((PyVarObject *)obj)->ob_size;
-			if (tsize < 0)
-				tsize = -tsize;
-			size = _PyObject_VAR_SIZE(tp, tsize);
-
-			dictoffset += (long)size;
-			assert(dictoffset > 0);
-			assert(dictoffset % SIZEOF_VOID_P == 0);
-		}
-		dictptr = (PyObject **) ((char *)obj + dictoffset);
-		dict = *dictptr;
-		if (dict != NULL) {
-			Py_INCREF(dict);
-			res = PyDict_GetItem(dict, name);
-			if (res != NULL) {
-				Py_INCREF(res);
-				Py_XDECREF(descr);
-				Py_DECREF(dict);
-
-                          /* CHANGED!
-                             If the tp_descr_get of res is of_get, 
-                             then call it. */
-                          if ((strcmp(PyString_AsString(name), "__parent__") != 0) &&
-                              PyObject_TypeCheck(res->ob_type,
-                                                 &ExtensionClassType)
-                              && res->ob_type->tp_descr_get != NULL) {
-                            PyObject *tres;
-                            tres = res->ob_type->tp_descr_get(
-                                                 res, obj, 
-                                                 OBJECT(obj->ob_type));
-                            Py_DECREF(res);
-                            res = tres;
-                          }
-                          goto done;
-			}
-			Py_DECREF(dict);
-		}
-	}
-
-	if (f != NULL) {
-		res = f(descr, obj, (PyObject *)obj->ob_type);
-		Py_DECREF(descr);
-		goto done;
-	}
-
-	if (descr != NULL) {
-		res = descr;
-        /* descr was already increfed above */
-		goto done;
-	}
-
-        /* CHANGED: Just use the name. Don't format. */
-        PyErr_SetObject(PyExc_AttributeError, name);
-  done:
-	Py_DECREF(name);
-	return res;
+    desc_res = Py_TYPE(res)->tp_descr_get(res, obj, (PyObject*)Py_TYPE(obj));
+    Py_DECREF(res);
+    return desc_res;
 }
 
 #include "pickle/pickle.c"
@@ -195,37 +83,94 @@ static struct PyMethodDef Base_methods[] = {
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
 
-
-static EC BaseType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "Base",
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-        /* tp_getattro       */ (getattrofunc)Base_getattro,
-        0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-         | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
-        ),
-	"Standard ExtensionClass base type",
-        0, 0, 0, 0, 0, 0, 
-        Base_methods,
+static PyTypeObject BaseType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "ExtensionClass.Base",         /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    (getattrofunc)Base_getattro,   /* tp_getattro */
+    0,                             /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Standard ExtensionClass base type", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    Base_methods,                  /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    0,                             /* tp_init */
+    0,                             /* tp_alloc */
+    0,                             /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
-static EC NoInstanceDictionaryBaseType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "NoInstanceDictionaryBase",
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        (Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-         | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
-        ),
-	"Base types for subclasses without instance dictionaries",
+static PyTypeObject NoInstanceDictionaryBaseType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "ExtensionClass.NoInstanceDictionaryBase", /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    0,                             /* tp_getattro */
+    0,                             /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Base types for subclasses without instance dictionaries", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    0,                             /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    0,                             /* tp_init */
+    0,                             /* tp_alloc */
+    0,                             /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
 static PyObject *
@@ -360,6 +305,7 @@ static int
 EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *__class_init__, *r;
+  PyObject* func = NULL;
 
   if (PyType_Type.tp_init(OBJECT(self), args, kw) < 0) 
     return -1; 
@@ -384,24 +330,58 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
       return 0;
     }
 
-  if (! (PyMethod_Check(__class_init__) 
-         && PyMethod_GET_FUNCTION(__class_init__)
-         )
-      )
-    {
+  if (PyFunction_Check(__class_init__)) {
+      func = __class_init__;
+  }
+  else if (PyMethod_Check(__class_init__)) {
+      func = PyMethod_GET_FUNCTION(__class_init__);
+  }
+#ifdef PY3K
+  else if (PyInstanceMethod_Check(__class_init__)) {
+      func = PyInstanceMethod_GET_FUNCTION(__class_init__);
+  }
+#endif
+
+  if (func == NULL) {
       Py_DECREF(__class_init__);
       PyErr_SetString(PyExc_TypeError, "Invalid type for __class_init__");
       return -1;
-    }
+  }
 
-  r = PyObject_CallFunctionObjArgs(PyMethod_GET_FUNCTION(__class_init__),
-                                   OBJECT(self), NULL);
+  r = PyObject_CallFunctionObjArgs(func, OBJECT(self), NULL);
   Py_DECREF(__class_init__);
   if (! r)
     return -1;
   Py_DECREF(r);
   
   return 0;
+}
+
+static int
+_is_bad_setattr_name(PyTypeObject* type, PyObject* as_bytes)
+{
+    char *cname = PyBytes_AS_STRING(as_bytes);
+    int l = PyBytes_GET_SIZE(as_bytes);
+
+    if (l < 4) {
+        return 0;
+    }
+
+    if (cname[0] == '_' && cname[1] == '_' && cname[l-1] == '_' && cname[l-2] == '_') {
+        char *c;
+        c = strchr(cname+2, '_');
+        if (c != NULL && (c - cname) >= (l-2)) {
+            PyErr_Format (
+                PyExc_TypeError,
+                "can't set attributes of built-in/extension type '%s' if the "
+                "attribute name begins and ends with __ and contains only "
+                "4 _ characters",
+                type->tp_name
+            );
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static int
@@ -417,73 +397,46 @@ EC_setattro(PyTypeObject *type, PyObject *name, PyObject *value)
 
 
   */
-  if (! (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) 
-    {
-      char *cname;
-      int l;
 
-      cname = PyString_AsString(name);
-      if (cname == NULL)
-        return -1;
-      l = PyString_GET_SIZE(name);
-      if (l > 4 
-          && cname[0] == '_' && cname[1] == '_'
-          && cname[l-1] == '_' && cname[l-2] == '_'
-          )
-        {
-          char *c;
-          
-          c = strchr(cname+2, '_');
-          if (c != NULL && (c - cname) >= (l-2))
-            {
-              PyErr_Format
-                (PyExc_TypeError,
-                 "can't set attributes of built-in/extension type '%s' if the "
-                 "attribute name begins and ends with __ and contains only "
-                 "4 _ characters",
-                 type->tp_name
-                 );
-              return -1;
-            }
+    if (! (type->tp_flags & Py_TPFLAGS_HEAPTYPE)) {
+        PyObject* as_bytes = convert_name(name);
+        if (as_bytes == NULL) {
+            return -1;
         }
-      
-      if (PyObject_GenericSetAttr(OBJECT(type), name, value) < 0)
+
+        if (_is_bad_setattr_name(type, as_bytes)) {
+            Py_DECREF(as_bytes);
+            return -1;
+        }
+
+        if (PyObject_GenericSetAttr(OBJECT(type), name, value) < 0) {
+            Py_DECREF(as_bytes);
+            return -1;
+        }
+    }
+    else if (PyType_Type.tp_setattro(OBJECT(type), name, value) < 0) {
         return -1;
     }
-  else if (PyType_Type.tp_setattro(OBJECT(type), name, value) < 0)
-    return -1;
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-  PyType_Modified(type);
-#endif
-  return 0;
+
+    PyType_Modified(type);
+    return 0;
 }
 
 
 static PyObject *
 inheritedAttribute(PyTypeObject *self, PyObject *name)
 {
-  int i;
-  PyObject *d, *cls;
+    PyObject* cls = NULL;
+    PyObject* res = NULL;
 
-  for (i = 1; i < PyTuple_GET_SIZE(self->tp_mro); i++)
-    {
-      cls = PyTuple_GET_ITEM(self->tp_mro, i);
-      if (PyType_Check(cls))
-        d = ((PyTypeObject *)cls)->tp_dict;
-      else if (PyClass_Check(cls))
-        d = ((PyClassObject *)cls)->cl_dict;
-      else
-        /* Unrecognized thing, punt */
-        d = NULL;
-      
-      if ((d == NULL) || (PyDict_GetItem(d, name) == NULL))
-        continue;
-                    
-      return PyObject_GetAttr(cls, name);
+    cls = PyObject_CallFunction((PyObject*)&PySuper_Type, "OO", self, self);
+    if (cls == NULL) {
+        return NULL;
     }
 
-  PyErr_SetObject(PyExc_AttributeError, name);
-  return NULL;
+    res = PyObject_GetAttr(cls, name);
+    Py_DECREF(cls);
+    return res;
 }
 
 static PyObject *
@@ -624,56 +577,50 @@ static struct PyMethodDef EC_methods[] = {
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
 
-
 static PyTypeObject ExtensionClassType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "ExtensionClass."
-                                "ExtensionClass",
-	/* tp_basicsize      */ 0,
-	/* tp_itemsize       */ 0,
-	/* tp_dealloc        */ (destructor)0,
-	/* tp_print          */ (printfunc)0,
-	/* tp_getattr        */ (getattrfunc)0,
-	/* tp_setattr        */ (setattrfunc)0,
-	/* tp_compare        */ (cmpfunc)0,
-	/* tp_repr           */ (reprfunc)0,
-	/* tp_as_number      */ 0,
-	/* tp_as_sequence    */ 0,
-	/* tp_as_mapping     */ 0,
-	/* tp_hash           */ (hashfunc)0,
-	/* tp_call           */ (ternaryfunc)0,
-	/* tp_str            */ (reprfunc)0,
-        /* tp_getattro       */ (getattrofunc)0,
-        /* tp_setattro       */ (setattrofunc)EC_setattro,
-        /* tp_as_buffer      */ 0,
-        /* tp_flags          */ Py_TPFLAGS_DEFAULT
-                                | Py_TPFLAGS_HAVE_GC
-                                | Py_TPFLAGS_BASETYPE
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
-                                | Py_TPFLAGS_HAVE_VERSION_TAG
-#endif
-                                ,
-	/* tp_doc            */ "Meta-class for extension classes",
-        /* tp_traverse       */ (traverseproc)0,
-        /* tp_clear          */ (inquiry)0,
-        /* tp_richcompare    */ (richcmpfunc)0,
-        /* tp_weaklistoffset */ (long)0,
-        /* tp_iter           */ (getiterfunc)0,
-        /* tp_iternext       */ (iternextfunc)0,
-        /* tp_methods        */ EC_methods,
-        /* tp_members        */ 0,
-        /* tp_getset         */ 0,
-        /* tp_base           */ 0,
-        /* tp_dict           */ 0, /* internal use */
-        /* tp_descr_get      */ (descrgetfunc)0,
-        /* tp_descr_set      */ (descrsetfunc)0,
-        /* tp_dictoffset     */ 0,
-        /* tp_init           */ (initproc)EC_init,
-        /* tp_alloc          */ (allocfunc)0,
-        /* tp_new            */ (newfunc)EC_new,
-	/* tp_free           */ 0, /* Low-level free-mem routine */
-	/* tp_is_gc          */ (inquiry)0, /* For PyObject_IS_GC */
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "ExtensionClass.ExtensionClass", /* tp_name */
+    0,                             /* tp_basicsize */
+    0,                             /* tp_itemsize */
+    0,                             /* tp_dealloc */
+    0,                             /* tp_print */
+    0,                             /* tp_getattr */
+    0,                             /* tp_setattr */
+    0,                             /* tp_compare */
+    0,                             /* tp_repr */
+    0,                             /* tp_as_number */
+    0,                             /* tp_as_sequence */
+    0,                             /* tp_as_mapping */
+    0,                             /* tp_hash */
+    0,                             /* tp_call */
+    0,                             /* tp_str*/
+    0,                             /* tp_getattro */
+    (setattrofunc)EC_setattro,     /* tp_setattro */
+    0,                             /* tp_as_buffer */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_HAVE_GC |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_VERSION_TAG,   /* tp_flags */
+    "Meta-class for extension classes", /* tp_doc*/
+    0,                             /* tp_traverse */
+    0,                             /* tp_clear */
+    0,                             /* tp_richcompare */
+    0,                             /* tp_weaklistoffset */
+    0,                             /* tp_iter */
+    0,                             /* tp_iternext */
+    EC_methods,                    /* tp_methods */
+    0,                             /* tp_members */
+    0,                             /* tp_getset */
+    0,                             /* tp_base */
+    0,                             /* tp_dict */
+    0,                             /* tp_descr_get */
+    0,                             /* tp_descr_set */
+    0,                             /* tp_dictoffset */
+    (initproc)EC_init,             /* tp_init */
+    0,                             /* tp_alloc */
+    (newfunc)EC_new,               /* tp_new */
+    0,                             /* tp_free */
+    0,                             /* tp_is_gc */
 };
 
 static PyObject *
@@ -714,7 +661,7 @@ EC_findiattrs_(PyObject *self, char *cname)
 {
   PyObject *name, *r;
   
-  name = PyString_FromString(cname);
+  name = NATIVE_FROM_STRING(cname);
   if (name == NULL)
     return NULL;
   r = ECBaseType->tp_getattro(self, name);
@@ -814,7 +761,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           typ->tp_new = ec_new_for_custom_dealloc;
     }
 
-  typ->ob_type = ECExtensionClassType; 
+  Py_TYPE(typ) = ECExtensionClassType;
 
   if (ecflags & EXTENSIONCLASS_NOINSTDICT_FLAG)
     typ->tp_base = &NoInstanceDictionaryBaseType;
@@ -838,16 +785,18 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           m = PyDescr_NewMethod(ECBaseType, pure_methods);
           if (! m)
             return -1;
-          m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
+          #ifdef PY3K
+            m = PyInstanceMethod_New((PyObject*) m);
+          #else
+            m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
+          #endif
           if (! m)
             return -1;
           if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m) 
               < 0)
             return -1;
         }      
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
       PyType_Modified(typ);
-#endif
     }
   else if (mdef && mdef->ml_name)
     {
@@ -860,9 +809,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
         return -1;
       if (PyDict_SetItemString(typ->tp_dict, mdef->ml_name, m) < 0)
         return -1;
-#ifdef Py_TPFLAGS_HAVE_VERSION_TAG
       PyType_Modified(typ);
-#endif
     }
 
   if (PyMapping_SetItemString(dict, name, (PyObject*)typ) < 0)  
@@ -891,13 +838,24 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
           Py_INCREF(callable);
           return callable;
         }
-      else
-        return callable->ob_type->tp_descr_get(
-                   callable, inst, 
-                   ((PyMethodObject*)callable)->im_class);
+      else {
+          #ifdef PY3K
+            return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
+          #else
+            return PyMethod_New(
+                PyMethod_GET_FUNCTION(callable),
+                inst,
+                PyMethod_GET_CLASS(callable));
+          #endif
+      }
     }
-  else
-    return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
+  else {
+    #ifdef PY3K
+        return PyMethod_New(callable, inst);
+    #else
+        return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
+    #endif
+  }
 }
 
 static struct ExtensionClassCAPIstruct
@@ -909,19 +867,32 @@ TrueExtensionClassCAPI = {
   &ExtensionClassType,
 };
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#ifdef PY3K
+static struct PyModuleDef moduledef =
+{
+    PyModuleDef_HEAD_INIT,
+    "_ExtensionClass",                      /* m_name */
+    _extensionclass_module_documentation,   /* m_doc */
+    -1,                                     /* m_size */
+    ec_methods,                             /* m_methods */
+    NULL,                                   /* m_reload */
+    NULL,                                   /* m_traverse */
+    NULL,                                   /* m_clear */
+    NULL,                                   /* m_free */
+};
 #endif
-PyMODINIT_FUNC
-init_ExtensionClass(void)
+
+static PyObject*
+module_init(void)
 {
   PyObject *m, *s;
 
-  if (pickle_setup() < 0)
-    return;
+  if (pickle_setup() < 0) {
+    return NULL;
+  }
 
 #define DEFINE_STRING(S) \
-  if(! (str ## S = PyString_FromString(# S))) return
+  if(! (str ## S = NATIVE_FROM_STRING(# S))) return NULL
 
   DEFINE_STRING(__of__);
   DEFINE_STRING(__get__);
@@ -930,11 +901,12 @@ init_ExtensionClass(void)
   DEFINE_STRING(__bases__);
   DEFINE_STRING(__mro__);
   DEFINE_STRING(__new__);
+  DEFINE_STRING(__parent__);
 #undef DEFINE_STRING
 
   PyExtensionClassCAPI = &TrueExtensionClassCAPI;
 
-  ExtensionClassType.ob_type = &PyType_Type;
+  Py_TYPE(&ExtensionClassType) = &PyType_Type;
   ExtensionClassType.tp_base = &PyType_Type;
   ExtensionClassType.tp_basicsize = PyType_Type.tp_basicsize;
   ExtensionClassType.tp_traverse = PyType_Type.tp_traverse;
@@ -942,43 +914,65 @@ init_ExtensionClass(void)
   
   /* Initialize types: */
   if (PyType_Ready(&ExtensionClassType) < 0)
-    return;
+    return NULL;
 
-  BaseType.ob_type = &ExtensionClassType;
+  Py_TYPE(&BaseType) = &ExtensionClassType;
   BaseType.tp_base = &PyBaseObject_Type;
   BaseType.tp_basicsize = PyBaseObject_Type.tp_basicsize;
   BaseType.tp_new = PyType_GenericNew;
 
   if (PyType_Ready(&BaseType) < 0)
-    return;
+    return NULL;
 
-  NoInstanceDictionaryBaseType.ob_type = &ExtensionClassType;
+  Py_TYPE(&NoInstanceDictionaryBaseType) = &ExtensionClassType;
   NoInstanceDictionaryBaseType.tp_base = &BaseType;
   NoInstanceDictionaryBaseType.tp_basicsize = BaseType.tp_basicsize;
   NoInstanceDictionaryBaseType.tp_new = PyType_GenericNew;
 
   if (PyType_Ready(&NoInstanceDictionaryBaseType) < 0)
-    return;
+    return NULL;
   
   /* Create the module and add the functions */
+#ifdef PY3K
+  m = PyModule_Create(&moduledef);
+#else
   m = Py_InitModule3("_ExtensionClass", ec_methods,
                      _extensionclass_module_documentation);
+#endif
 
   if (m == NULL)
-    return;
+    return NULL;
 
-  s = PyCObject_FromVoidPtr(PyExtensionClassCAPI, NULL);
+  s = PyCapsule_New(PyExtensionClassCAPI, "ExtensionClass.CAPI2", NULL);
+  if (s == NULL) {
+      return NULL;
+  }
+
   if (PyModule_AddObject(m, "CAPI2", s) < 0)
-    return;
-        
+    return NULL;
+
   /* Add types: */
-  if (PyModule_AddObject(m, "ExtensionClass", 
+  if (PyModule_AddObject(m, "ExtensionClass",
                          (PyObject *)&ExtensionClassType) < 0)
-    return;
+    return NULL;
   if (PyModule_AddObject(m, "Base", (PyObject *)&BaseType) < 0)
-    return;
-  if (PyModule_AddObject(m, "NoInstanceDictionaryBase", 
+    return NULL;
+
+  if (PyModule_AddObject(m, "NoInstanceDictionaryBase",
                          (PyObject *)&NoInstanceDictionaryBaseType) < 0)
-    return;
+      return NULL;
+
+  return m;
 }
 
+#ifdef PY3K
+PyMODINIT_FUNC PyInit__ExtensionClass(void)
+{
+    return module_init();
+}
+#else
+PyMODINIT_FUNC init_ExtensionClass(void)
+{
+    module_init();
+}
+#endif
