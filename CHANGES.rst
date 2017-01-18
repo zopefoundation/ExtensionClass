@@ -1,7 +1,7 @@
 Changelog
 =========
 
-4.2.0 (unreleased)
+4.2.0 (2017-01-18)
 ------------------
 
 - Port the C extension to Python 3.
