@@ -9,9 +9,11 @@ python:
     - pypy
     - pypy3
 install:
-    - pip install nose
+    - pip install zc.buildout
+    - buildout bootstrap
+    - buildout
 script:
-    - nosetests --doctest-tests
+    - bin/test -v1
 notifications:
     email: false
 cache:
