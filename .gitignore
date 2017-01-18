@@ -15,3 +15,5 @@ parts
 .installed.cfg
 develop-eggs/
 eggs/
+nosetests.xml
+src/coverage.xml
