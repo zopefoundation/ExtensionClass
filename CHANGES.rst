@@ -4,7 +4,9 @@ Changelog
 4.2.0 (unreleased)
 ------------------
 
-- Add support for Python 3.5.
+- Port the C extension to Python 3.
+
+- Add support for Python 3.5 and 3.6.
 
 - Drop support for Python 2.6, 3.2.
 
