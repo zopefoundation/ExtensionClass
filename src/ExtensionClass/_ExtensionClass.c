@@ -101,6 +101,24 @@ Base_getattro(PyObject *obj, PyObject *name)
             Py_INCREF(res);
             Py_XDECREF(descr);
             Py_DECREF(*dictptr);
+
+            /* CHANGED! If the tp_descr_get of res is of_get, then call it. */
+            if (PyObject_TypeCheck(Py_TYPE(res), &ExtensionClassType)) {
+                if (Py_TYPE(res)->tp_descr_get) {
+                    int name_is_parent = PyObject_RichCompareBool(name, str__parent__, Py_EQ);
+
+                    if (name_is_parent == 0) {
+                        PyObject *tres = Py_TYPE(res)->tp_descr_get(res, obj, (PyObject*)Py_TYPE(obj));
+                        Py_DECREF(res);
+                        res = tres;
+                    }
+                    else if (name_is_parent == -1) {
+                        PyErr_Clear();
+                    }
+                }
+            }
+            /* End of change. */
+
             goto done;
         }
         Py_DECREF(*dictptr);
