@@ -48,7 +48,6 @@ Base_getattro(PyObject *obj, PyObject *name)
     PyObject *descr = NULL;
     PyObject *res = NULL;
     descrgetfunc f;
-    Py_ssize_t dictoffset;
     PyObject **dictptr;
 
     if (!PyString_Check(name)){
@@ -92,37 +91,18 @@ Base_getattro(PyObject *obj, PyObject *name)
         }
     }
 
-    if (dict == NULL) {
-        /* Inline _PyObject_GetDictPtr */
-        dictoffset = tp->tp_dictoffset;
-        if (dictoffset != 0) {
-            if (dictoffset < 0) {
-                Py_ssize_t tsize;
-                size_t size;
+    dictptr = _PyObject_GetDictPtr(obj);
 
-                tsize = ((PyVarObject *)obj)->ob_size;
-                if (tsize < 0)
-                    tsize = -tsize;
-                size = _PyObject_VAR_SIZE(tp, tsize);
-
-                dictoffset += (long)size;
-                assert(dictoffset > 0);
-                assert(dictoffset % SIZEOF_VOID_P == 0);
-            }
-            dictptr = (PyObject **) ((char *)obj + dictoffset);
-            dict = *dictptr;
-        }
-    }
-    if (dict != NULL) {
-        Py_INCREF(dict);
-        res = PyDict_GetItem(dict, name);
+    if (dictptr && *dictptr) {
+        Py_INCREF(*dictptr);
+        res = PyDict_GetItem(*dictptr, name);
         if (res != NULL) {
             Py_INCREF(res);
             Py_XDECREF(descr);
-            Py_DECREF(dict);
+            Py_DECREF(*dictptr);
             goto done;
         }
-        Py_DECREF(dict);
+        Py_DECREF(*dictptr);
     }
 
     if (f != NULL) {
