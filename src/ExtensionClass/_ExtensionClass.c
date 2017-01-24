@@ -50,7 +50,8 @@ Base_getattro(PyObject *obj, PyObject *name)
     descrgetfunc f;
     PyObject **dictptr;
 
-    if (!PyString_Check(name)){
+    if (!NATIVE_CHECK(name)) {
+#ifndef PY3K
 #ifdef Py_USING_UNICODE
         /* The Unicode to string conversion is done here because the
            existing tp_setattro slots expect a string object as name
@@ -61,6 +62,7 @@ Base_getattro(PyObject *obj, PyObject *name)
                 return NULL;
         }
         else
+#endif
 #endif
         {
             PyErr_Format(PyExc_TypeError,
@@ -81,8 +83,7 @@ Base_getattro(PyObject *obj, PyObject *name)
     Py_XINCREF(descr);
 
     f = NULL;
-    if (descr != NULL &&
-        PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
+    if (descr != NULL && HAS_TP_DESCR_GET(descr)) {
         f = descr->ob_type->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
             res = f(descr, obj, (PyObject *)obj->ob_type);
@@ -117,9 +118,16 @@ Base_getattro(PyObject *obj, PyObject *name)
         goto done;
     }
 
+#ifdef PY3K
+    PyErr_Format(PyExc_AttributeError,
+                 "'%.50s' object has no attribute '%U'",
+                 tp->tp_name, name);
+#else
     PyErr_Format(PyExc_AttributeError,
                  "'%.50s' object has no attribute '%.400s'",
                  tp->tp_name, PyString_AS_STRING(name));
+#endif
+
   done:
     Py_DECREF(name);
     return res;
