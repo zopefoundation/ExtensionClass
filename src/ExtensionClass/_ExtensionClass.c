@@ -44,36 +44,134 @@ of_get(PyObject *self, PyObject *inst, PyObject *cls)
 PyObject *
 Base_getattro(PyObject *obj, PyObject *name)
 {
-    int name_is_parent = 0;
-    PyObject* res = NULL;
-    PyObject* desc_res = NULL;
+    PyTypeObject *tp = Py_TYPE(obj);
+    PyObject *descr = NULL;
+    PyObject *res = NULL;
+    descrgetfunc f;
+    Py_ssize_t dictoffset;
+    PyObject **dictptr;
 
-    res = PyObject_GenericGetAttr(obj, name);
-    if (res == NULL) {
-        return NULL;
+    if (!PyString_Check(name)){
+#ifdef Py_USING_UNICODE
+        /* The Unicode to string conversion is done here because the
+           existing tp_setattro slots expect a string object as name
+           and we wouldn't want to break those. */
+        if (PyUnicode_Check(name)) {
+            name = PyUnicode_AsEncodedString(name, NULL, NULL);
+            if (name == NULL)
+                return NULL;
+        }
+        else
+#endif
+        {
+            PyErr_Format(PyExc_TypeError,
+                         "attribute name must be string, not '%.200s'",
+                         Py_TYPE(name)->tp_name);
+            return NULL;
+        }
+    }
+    else
+        Py_INCREF(name);
+
+    if (tp->tp_dict == NULL) {
+        if (PyType_Ready(tp) < 0)
+            goto done;
     }
 
-    name_is_parent = PyObject_RichCompareBool(name, str__parent__, Py_EQ);
-    if (name_is_parent == -1) {
-        Py_DECREF(res);
-        return NULL;
+#if 0 /* XXX this is not quite _PyType_Lookup anymore */
+    /* Inline _PyType_Lookup */
+    {
+        Py_ssize_t i, n;
+        PyObject *mro, *base, *dict;
+
+        /* Look in tp_dict of types in MRO */
+        mro = tp->tp_mro;
+        assert(mro != NULL);
+        assert(PyTuple_Check(mro));
+        n = PyTuple_GET_SIZE(mro);
+        for (i = 0; i < n; i++) {
+            base = PyTuple_GET_ITEM(mro, i);
+            if (PyClass_Check(base))
+                dict = ((PyClassObject *)base)->cl_dict;
+            else {
+                assert(PyType_Check(base));
+                dict = ((PyTypeObject *)base)->tp_dict;
+            }
+            assert(dict && PyDict_Check(dict));
+            descr = PyDict_GetItem(dict, name);
+            if (descr != NULL)
+                break;
+        }
+    }
+#else
+    descr = _PyType_Lookup(tp, name);
+#endif
+
+    Py_XINCREF(descr);
+
+    f = NULL;
+    if (descr != NULL &&
+        PyType_HasFeature(descr->ob_type, Py_TPFLAGS_HAVE_CLASS)) {
+        f = descr->ob_type->tp_descr_get;
+        if (f != NULL && PyDescr_IsData(descr)) {
+            res = f(descr, obj, (PyObject *)obj->ob_type);
+            Py_DECREF(descr);
+            goto done;
+        }
     }
 
-    if (name_is_parent == 1) {
-        return res;
+    if (dict == NULL) {
+        /* Inline _PyObject_GetDictPtr */
+        dictoffset = tp->tp_dictoffset;
+        if (dictoffset != 0) {
+            if (dictoffset < 0) {
+                Py_ssize_t tsize;
+                size_t size;
+
+                tsize = ((PyVarObject *)obj)->ob_size;
+                if (tsize < 0)
+                    tsize = -tsize;
+                size = _PyObject_VAR_SIZE(tp, tsize);
+
+                dictoffset += (long)size;
+                assert(dictoffset > 0);
+                assert(dictoffset % SIZEOF_VOID_P == 0);
+            }
+            dictptr = (PyObject **) ((char *)obj + dictoffset);
+            dict = *dictptr;
+        }
+    }
+    if (dict != NULL) {
+        Py_INCREF(dict);
+        res = PyDict_GetItem(dict, name);
+        if (res != NULL) {
+            Py_INCREF(res);
+            Py_XDECREF(descr);
+            Py_DECREF(dict);
+            goto done;
+        }
+        Py_DECREF(dict);
     }
 
-    if (!PyObject_TypeCheck(Py_TYPE(res), &ExtensionClassType)) {
-        return res;
+    if (f != NULL) {
+        res = f(descr, obj, (PyObject *)Py_TYPE(obj));
+        Py_DECREF(descr);
+        goto done;
     }
 
-    if (!Py_TYPE(res)->tp_descr_get) {
-        return res;
+    if (descr != NULL) {
+        res = descr;
+        /* descr was already increfed above */
+        goto done;
     }
 
-    desc_res = Py_TYPE(res)->tp_descr_get(res, obj, (PyObject*)Py_TYPE(obj));
-    Py_DECREF(res);
-    return desc_res;
+    PyErr_Format(PyExc_AttributeError,
+                 "'%.50s' object has no attribute '%.400s'",
+                 tp->tp_name, PyString_AS_STRING(name));
+  done:
+    Py_DECREF(name);
+    return res;
+
 }
 
 #include "pickle/pickle.c"
