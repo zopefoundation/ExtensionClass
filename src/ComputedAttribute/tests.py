@@ -73,6 +73,31 @@ def test_wrapper_support():
 import unittest
 from doctest import DocTestSuite
 
+from ExtensionClass import Base
+from ComputedAttribute import ComputedAttribute
+
+
+class TestComputedAttribute(unittest.TestCase):
+    def _construct_class(self, level):
+        class X(Base):
+            def _get_a(self):
+                return 1
+
+            a = ComputedAttribute(_get_a, level)
+
+        return X
+
+    def test_computed_attribute_on_class_level0(self):
+        x = self._construct_class(0)()
+        self.assertEqual(x.a, 1)
+
+    def test_computed_attribute_on_class_level1(self):
+        x = self._construct_class(1)()
+        self.assertIsInstance(x.a, ComputedAttribute)
+
 
 def test_suite():
-    return unittest.TestSuite((DocTestSuite(),))
+    suite = unittest.TestSuite()
+    suite.addTest(DocTestSuite())
+    suite.addTest(unittest.makeSuite(TestComputedAttribute))
+    return suite

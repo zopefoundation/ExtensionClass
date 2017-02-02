@@ -98,6 +98,7 @@ called even when it is retrieved from an instance.
 1
 """
 
+import inspect
 import os
 import sys
 
@@ -219,13 +220,38 @@ class ExtensionClass(type):
 # to care or worry about using super(): it's always object.
 
 def Base_getattro(self, name):
-    res = object.__getattribute__(self, name)
-    # If it's a descriptor for something besides __parent__, call it.
-    if name != '__parent__' and isinstance(res, Base):
-        descr_get = getattr(res, '__get__', None)
-        if descr_get is not None:
-            res = descr_get(self, type(self))
-    return res
+    descr = None
+
+    for base in type(self).__mro__:
+        if name in base.__dict__:
+            descr = base.__dict__[name]
+            break
+
+    if descr is not None and inspect.isdatadescriptor(base):
+        return descr.__get__(self, type(self))
+
+    try:
+        # Don't do self.__dict__ otherwise you get recursion.
+        inst_dict = object.__getattribute__(self, '__dict__')
+    except AttributeError:
+        pass
+    else:
+        if name in inst_dict:
+            descr = inst_dict[name]
+            # If the tp_descr_get of res is of_get, then call it.
+            if name == '__parent__' or not isinstance(descr, Base):
+                return descr
+
+    if descr is not None:
+        descr_get = getattr(descr, '__get__', None)
+        if descr_get is None:
+            return descr
+
+        return descr_get(self, type(self))
+
+    raise AttributeError(
+            "'%.50s' object has not attribute '%s'",
+            type(self).__name__, name)
 
 
 def _slotnames(self):
