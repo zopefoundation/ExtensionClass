@@ -218,7 +218,7 @@ static PyExtensionClass NAME ## Type = { PyVarObject_HEAD_INIT(NULL, 0) # NAME, 
    or a class' instanses have instance dictionaries: */
 #define HasInstDict(O) (_PyObject_GetDictPtr(O) != NULL)
 
-#define ClassHasInstDict(C) ((C)->tp_dictoffset > 0))
+#define ClassHasInstDict(C) ((C)->tp_dictoffset > 0)
 
 /* Get an object's instance dictionary.  Use with caution */
 #define INSTANCE_DICT(inst) (_PyObject_GetDictPtr(O))
