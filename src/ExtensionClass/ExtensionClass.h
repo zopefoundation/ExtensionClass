@@ -179,7 +179,7 @@ static struct ExtensionClassCAPIstruct {
 
 /* The following macro checks whether an instance is an extension instance: */
 #define PyExtensionInstance_Check(INST) \
-  PyObject_TypeCheck(((PyObject*)(INST))->ob_type, ECExtensionClassType)
+  PyObject_TypeCheck(Py_TYPE(INST), ECExtensionClassType)
 
 #define CHECK_FOR_ERRORS(MESS)
 
@@ -254,9 +254,9 @@ static PyExtensionClass NAME ## Type = { PyVarObject_HEAD_INIT(NULL, 0) # NAME, 
 #undef PyObject_DEL
 
 #define PyMem_DEL(O)                                   \
-  if (((O)->ob_type->tp_flags & Py_TPFLAGS_HAVE_CLASS) \
-      && ((O)->ob_type->tp_free != NULL))              \
-    (O)->ob_type->tp_free((PyObject*)(O));             \
+  if ((Py_TYPE(O)->tp_flags & Py_TPFLAGS_HAVE_CLASS) \
+      && (Py_TYPE(O)->tp_free != NULL))              \
+    Py_TYPE(O)->tp_free((PyObject*)(O));             \
   else                                                 \
     PyObject_FREE((O));
 
