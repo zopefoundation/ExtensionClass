@@ -208,13 +208,11 @@ static PyExtensionClass NAME ## Type = { PyVarObject_HEAD_INIT(NULL, 0) # NAME, 
   PyExtensionClassCAPI->PyECMethod_New_((CALLABLE),(INST))
 
 /* Return the instance that is bound by an extension class method. */
-#define PyECMethod_Self(M) \
-(PyMethod_Check((M)) ? ((PyMethodObject*)(M))->im_self : NULL)
+#define PyECMethod_Self(M) (PyMethod_Check((M)) ? PyMethod_GET_SELF(M) : NULL)
 
 /* Check whether an object has an __of__ method for returning itself
    in the context of it's container. */
-#define has__of__(O) (PyObject_TypeCheck((O)->ob_type, ECExtensionClassType) \
-                      && (O)->ob_type->tp_descr_get != NULL)
+#define has__of__(O) (PyExtensionInstance_Check(O) && Py_TYPE(O)->tp_descr_get != NULL)
 
 /* The following macros are used to check whether an instance
    or a class' instanses have instance dictionaries: */
