@@ -1,9 +1,10 @@
 Changelog
 =========
 
-4.2.1 (unreleased)
+4.2.1 (2017-02-02)
 ------------------
 
+- Fix problems with computed attribute and property wrapping.
 
 4.2.0 (2017-01-18)
 ------------------
