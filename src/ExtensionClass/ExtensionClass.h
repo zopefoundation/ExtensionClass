@@ -19,61 +19,61 @@
   Extension Class Definitions
 
   Implementing base extension classes
-  
+
     A base extension class is implemented in much the same way that an
     extension type is implemented, except:
-  
+
     - The include file, 'ExtensionClass.h', must be included.
- 
+
     - The type structure is declared to be of type
-	  'PyExtensionClass', rather than of type 'PyTypeObject'.
- 
+      'PyExtensionClass', rather than of type 'PyTypeObject'.
+
     - The type structure has an additional member that must be defined
-	  after the documentation string.  This extra member is a method chain
-	  ('PyMethodChain') containing a linked list of method definition
-	  ('PyMethodDef') lists.  Method chains can be used to implement
-	  method inheritance in C.  Most extensions don't use method chains,
-	  but simply define method lists, which are null-terminated arrays
-	  of method definitions.  A macro, 'METHOD_CHAIN' is defined in
-	  'ExtensionClass.h' that converts a method list to a method chain.
-	  (See the example below.)
-  
+      after the documentation string.  This extra member is a method chain
+      ('PyMethodChain') containing a linked list of method definition
+      ('PyMethodDef') lists.  Method chains can be used to implement
+      method inheritance in C.  Most extensions don't use method chains,
+      but simply define method lists, which are null-terminated arrays
+      of method definitions.  A macro, 'METHOD_CHAIN' is defined in
+      'ExtensionClass.h' that converts a method list to a method chain.
+      (See the example below.)
+
     - Module functions that create new instances must be replaced by an
-	  '__init__' method that initializes, but does not create storage for 
-	  instances.
-  
+      '__init__' method that initializes, but does not create storage for
+      instances.
+
     - The extension class must be initialized and exported to the module
-	  with::
-  
-	      PyExtensionClass_Export(d,"name",type);
-  
-	  where 'name' is the module name and 'type' is the extension class
-	  type object.
-  
+      with::
+
+          PyExtensionClass_Export(d,"name",type);
+
+      where 'name' is the module name and 'type' is the extension class
+      type object.
+
     Attribute lookup
-  
-	  Attribute lookup is performed by calling the base extension class
-	  'getattr' operation for the base extension class that includes C
-	  data, or for the first base extension class, if none of the base
-	  extension classes include C data.  'ExtensionClass.h' defines a
-	  macro 'Py_FindAttrString' that can be used to find an object's
-	  attributes that are stored in the object's instance dictionary or
-	  in the object's class or base classes::
-  
-	     v = Py_FindAttrString(self,name);
-  
-	  In addition, a macro is provided that replaces 'Py_FindMethod'
-	  calls with logic to perform the same sort of lookup that is
-	  provided by 'Py_FindAttrString'.
-  
+
+      Attribute lookup is performed by calling the base extension class
+      'getattr' operation for the base extension class that includes C
+      data, or for the first base extension class, if none of the base
+      extension classes include C data.  'ExtensionClass.h' defines a
+      macro 'Py_FindAttrString' that can be used to find an object's
+      attributes that are stored in the object's instance dictionary or
+      in the object's class or base classes::
+
+         v = Py_FindAttrString(self,name);
+
+    In addition, a macro is provided that replaces 'Py_FindMethod'
+    calls with logic to perform the same sort of lookup that is
+    provided by 'Py_FindAttrString'.
+
     Linking
-  
-	  The extension class mechanism was designed to be useful with
-	  dynamically linked extension modules.  Modules that implement
-	  extension classes do not have to be linked against an extension
-	  class library.  The macro 'PyExtensionClass_Export' imports the
-	  'ExtensionClass' module and uses objects imported from this module
-	  to initialize an extension class with necessary behavior.
+
+      The extension class mechanism was designed to be useful with
+      dynamically linked extension modules.  Modules that implement
+      extension classes do not have to be linked against an extension
+      class library.  The macro 'PyExtensionClass_Export' imports the
+      'ExtensionClass' module and uses objects imported from this module
+      to initialize an extension class with necessary behavior.
 
 */
 
@@ -106,7 +106,7 @@ static struct ExtensionClassCAPIstruct {
 
 
   PyObject *(*EC_findiattrs_)(PyObject *self, char *cname);
-  int (*PyExtensionClass_Export_)(PyObject *dict, char *name, 
+  int (*PyExtensionClass_Export_)(PyObject *dict, char *name,
                                   PyTypeObject *typ);
   PyObject *(*PyECMethod_New_)(PyObject *callable, PyObject *inst);
   PyExtensionClass *ECBaseType_;
@@ -128,7 +128,7 @@ static struct ExtensionClassCAPIstruct {
    lookup methods or attributes that are not managed by the base type
    directly.  The macro is generally used to search for attributes
    after other attribute searches have failed.
-   
+
    Note that in Python 1.4, a getattr operation may be provided that
    uses an object argument. Classes that support this new operation
    should use Py_FindAttr.
@@ -145,7 +145,7 @@ static struct ExtensionClassCAPIstruct {
    lookup methods or attributes that are not managed by the base type
    directly.  The macro is generally used to search for attributes
    after other attribute searches have failed.
-   
+
    Note that in Python 1.4, a getattr operation may be provided that
    uses an object argument. Classes that support this new operation
    should use Py_FindAttr.
@@ -181,7 +181,7 @@ static struct ExtensionClassCAPIstruct {
 #define PyExtensionInstance_Check(INST) \
   PyObject_TypeCheck(((PyObject*)(INST))->ob_type, ECExtensionClassType)
 
-#define CHECK_FOR_ERRORS(MESS) 
+#define CHECK_FOR_ERRORS(MESS)
 
 /* The following macro can be used to define an extension base class
    that only provides method and that is used as a pure mix-in class. */
@@ -228,7 +228,7 @@ static PyExtensionClass NAME ## Type = { PyVarObject_HEAD_INIT(NULL, 0) # NAME, 
 /* Test whether an ExtensionClass, S, is a subclass of ExtensionClass C. */
 #define ExtensionClassSubclass_Check(S,C) PyType_IsSubtype((S), (C))
 
-/* Test whether an ExtensionClass instance , I, is a subclass of 
+/* Test whether an ExtensionClass instance , I, is a subclass of
    ExtensionClass C. */
 #define ExtensionClassSubclassInstance_Check(I,C) PyObject_TypeCheck((I), (C))
 
