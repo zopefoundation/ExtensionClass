@@ -20,13 +20,13 @@ static PyObject *py___getnewargs__, *py___getstate__;
 static int
 pickle_setup(void)
 {
+    PyObject* copy_reg;
+
 #define INIT_STRING(S) if (!(py_ ## S = INTERN(#S))) return -1;
     INIT_STRING(__slotnames__);
     INIT_STRING(__getnewargs__);
     INIT_STRING(__getstate__);
 #undef INIT_STRING
-
-    PyObject* copy_reg;
 
 #ifdef PY3K
     copy_reg = PyImport_ImportModule("copyreg");
