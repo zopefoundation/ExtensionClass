@@ -45,9 +45,11 @@ else:
                   include_dirs=['src']),
     ]
 
+__version__ = '4.3.0.dev0'
+
 setup(
     name='ExtensionClass',
-    version='4.2.2.dev0',
+    version=__version__,
     url='http://pypi.python.org/pypi/ExtensionClass',
     license='ZPL 2.1',
     description='Metaclass for subclassable extension types',
@@ -66,7 +68,6 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",

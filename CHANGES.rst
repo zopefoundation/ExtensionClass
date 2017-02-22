@@ -1,9 +1,14 @@
 Changelog
 =========
 
-4.2.2 (unreleased)
+4.3.0 (unreleased)
 ------------------
 
+- Drop support for Python 3.3.
+
+- Remove unused C macro from `ExtensionClass.h`.
+
+- Fix C compilation under Windows.
 
 4.2.1 (2017-02-02)
 ------------------
