@@ -32,9 +32,14 @@ Except that you can also use computed attributes with instances:
 >>> p.angle = ComputedAttribute(lambda self: math.atan(self.y*1.0/self.x))
 >>> "%.2f" % p.angle
 '0.93'
-
-$Id$
 """
+
+from doctest import DocTestSuite
+import unittest
+
+from ComputedAttribute import ComputedAttribute
+from ExtensionClass import Base
+
 
 def test_wrapper_support():
     """Wrapper support
@@ -70,13 +75,6 @@ def test_wrapper_support():
     """
 
 
-import unittest
-from doctest import DocTestSuite
-
-from ExtensionClass import Base
-from ComputedAttribute import ComputedAttribute
-
-
 class TestComputedAttribute(unittest.TestCase):
     def _construct_class(self, level):
         class X(Base):
@@ -94,6 +92,15 @@ class TestComputedAttribute(unittest.TestCase):
     def test_computed_attribute_on_class_level1(self):
         x = self._construct_class(1)()
         self.assertIsInstance(x.a, ComputedAttribute)
+
+    def test_compilation(self):
+        from ComputedAttribute import IS_PYPY, IS_PURE
+        if IS_PURE or IS_PYPY:
+            with self.assertRaises((AttributeError, ImportError)):
+                from ComputedAttribute import _ComputedAttribute
+        else:
+            from ComputedAttribute import _ComputedAttribute
+            self.assertTrue(hasattr(_ComputedAttribute, 'ComputedAttribute'))
 
 
 def test_suite():

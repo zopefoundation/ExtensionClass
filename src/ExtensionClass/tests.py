@@ -12,11 +12,13 @@
 #
 ##############################################################################
 
-import sys
 
-from ExtensionClass import *
 from doctest import DocTestSuite
+import sys
 import unittest
+
+from ExtensionClass import *  # NOQA
+
 
 def print_dict(d):
     d = d.items()
@@ -891,6 +893,7 @@ def test_unbound_function_as___class_init___hook():
     B
     """
 
+
 class TestEffectivelyCooperativeBase(unittest.TestCase):
 
     def test___getattribute__cooperative(self):
@@ -917,6 +920,7 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
 
         # Therefore, we don't get AttributeError, we get our defined exception
         self.assertRaises(YouShallNotPass, getattr, WithBaseAndNoAttributes(), 'a')
+
 
 class Test_add_classic_mro(unittest.TestCase):
 
@@ -977,9 +981,24 @@ class Test_add_classic_mro(unittest.TestCase):
         self._callFUT(mro, _Derived)
         self.assertEqual(mro, [already, _Derived, _Base])
 
+
+class TestExtensionClass(unittest.TestCase):
+
+    def test_compilation(self):
+        from ExtensionClass import IS_PYPY, IS_PURE
+        if IS_PURE or IS_PYPY:
+            with self.assertRaises((AttributeError, ImportError)):
+                from ExtensionClass import _ExtensionClass
+        else:
+            from ExtensionClass import _ExtensionClass
+            self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
+
+
 def test_suite():
     return unittest.TestSuite((
         DocTestSuite('ExtensionClass'),
         DocTestSuite(),
         unittest.makeSuite(TestEffectivelyCooperativeBase),
+        unittest.makeSuite(Test_add_classic_mro),
+        unittest.makeSuite(TestExtensionClass),
     ))

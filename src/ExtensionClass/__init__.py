@@ -100,6 +100,7 @@ called even when it is retrieved from an instance.
 
 import inspect
 import os
+import platform
 import sys
 
 if sys.version_info > (3, ):  # pragma: no cover
@@ -328,8 +329,8 @@ class NoInstanceDictionaryBase(Base):
 _NoInstanceDictionaryBase = NoInstanceDictionaryBase
 
 
-if not 'PURE_PYTHON' in os.environ:  # pragma no cover
-    try:
-        from ._ExtensionClass import *
-    except ImportError:
-        pass
+IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
+IS_PURE = 'PURE_PYTHON' in os.environ
+
+if not (IS_PYPY or IS_PURE):  # pragma no cover
+    from ._ExtensionClass import *  # NOQA

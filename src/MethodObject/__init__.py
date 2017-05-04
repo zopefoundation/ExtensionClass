@@ -1,4 +1,5 @@
 import os
+import platform
 
 from types import MethodType
 from ExtensionClass import Base
@@ -20,8 +21,8 @@ class Method(Base):
         return MethodType(self, inst)
 
 
-if 'PURE_PYTHON' not in os.environ:  # pragma no cover
-    try:
-        from ._MethodObject import *
-    except ImportError:
-        pass
+IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
+IS_PURE = 'PURE_PYTHON' in os.environ
+
+if not (IS_PYPY or IS_PURE):  # pragma no cover
+    from ._MethodObject import *  # NOQA

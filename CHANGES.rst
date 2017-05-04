@@ -1,9 +1,10 @@
 Changelog
 =========
 
-4.3.1 (unreleased)
+4.4.0 (unreleased)
 ------------------
 
+- Fail if C extensions couldn't be compiled on compatible platforms.
 
 4.3.0 (2017-02-22)
 ------------------

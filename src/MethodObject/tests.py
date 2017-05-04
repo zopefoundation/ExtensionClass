@@ -12,6 +12,9 @@
 #
 ##############################################################################
 
+from doctest import DocTestSuite
+import unittest
+
 
 def test_methodobject():
     """
@@ -34,9 +37,20 @@ def test_methodobject():
     """
 
 
+class TestMethodObject(unittest.TestCase):
+
+    def test_compilation(self):
+        from MethodObject import IS_PYPY, IS_PURE
+        if IS_PURE or IS_PYPY:
+            with self.assertRaises((AttributeError, ImportError)):
+                from MethodObject import _MethodObject
+        else:
+            from MethodObject import _MethodObject
+            self.assertTrue(hasattr(_MethodObject, 'Method'))
+
+
 def test_suite():
-    import unittest
-    from doctest import DocTestSuite
-    return unittest.TestSuite((
-        DocTestSuite(),
-    ))
+    suite = unittest.TestSuite()
+    suite.addTest(DocTestSuite())
+    suite.addTest(unittest.makeSuite(TestMethodObject))
+    return suite

@@ -1,0 +1,12 @@
+[run]
+branch = True
+source =
+    ComputedAttribute
+    ExtensionClass
+    MethodObject
+omit =
+    tests/*.py
+    bootstrap.py
+
+[report]
+precision = 2
