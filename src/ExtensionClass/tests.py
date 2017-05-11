@@ -985,13 +985,13 @@ class Test_add_classic_mro(unittest.TestCase):
 class TestExtensionClass(unittest.TestCase):
 
     def test_compilation(self):
-        from ExtensionClass import IS_PYPY, IS_PURE
-        if IS_PURE or IS_PYPY:
-            with self.assertRaises((AttributeError, ImportError)):
-                from ExtensionClass import _ExtensionClass
-        else:
+        from ExtensionClass import C_EXTENSION
+        if C_EXTENSION:
             from ExtensionClass import _ExtensionClass
             self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
+        else:
+            with self.assertRaises((AttributeError, ImportError)):
+                from ExtensionClass import _ExtensionClass
 
 
 def test_suite():

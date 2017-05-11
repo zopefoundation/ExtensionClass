@@ -94,13 +94,13 @@ class TestComputedAttribute(unittest.TestCase):
         self.assertIsInstance(x.a, ComputedAttribute)
 
     def test_compilation(self):
-        from ComputedAttribute import IS_PYPY, IS_PURE
-        if IS_PURE or IS_PYPY:
-            with self.assertRaises((AttributeError, ImportError)):
-                from ComputedAttribute import _ComputedAttribute
-        else:
+        from ExtensionClass import C_EXTENSION
+        if C_EXTENSION:
             from ComputedAttribute import _ComputedAttribute
             self.assertTrue(hasattr(_ComputedAttribute, 'ComputedAttribute'))
+        else:
+            with self.assertRaises((AttributeError, ImportError)):
+                from ComputedAttribute import _ComputedAttribute
 
 
 def test_suite():

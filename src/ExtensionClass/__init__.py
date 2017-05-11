@@ -108,6 +108,10 @@ if sys.version_info > (3, ):  # pragma: no cover
 else:
     import copy_reg
 
+_IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
+_IS_PURE = 'PURE_PYTHON' in os.environ
+C_EXTENSION = not (_IS_PYPY or _IS_PURE)
+
 
 def of_get(self, inst, type_=None):
     if not issubclass(type(type_), ExtensionClass):
@@ -329,8 +333,5 @@ class NoInstanceDictionaryBase(Base):
 _NoInstanceDictionaryBase = NoInstanceDictionaryBase
 
 
-IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
-IS_PURE = 'PURE_PYTHON' in os.environ
-
-if not (IS_PYPY or IS_PURE):  # pragma no cover
+if C_EXTENSION:  # pragma no cover
     from ._ExtensionClass import *  # NOQA
