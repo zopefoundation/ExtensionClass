@@ -1,7 +1,5 @@
-import os
-import platform
-
 from ExtensionClass import Base
+from ExtensionClass import C_EXTENSION
 
 
 class ComputedAttribute(Base):
@@ -20,8 +18,5 @@ class ComputedAttribute(Base):
         return func(inst)
 
 
-IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
-IS_PURE = 'PURE_PYTHON' in os.environ
-
-if not (IS_PYPY or IS_PURE):  # pragma no cover
+if C_EXTENSION:  # pragma no cover
     from ._ComputedAttribute import *  # NOQA

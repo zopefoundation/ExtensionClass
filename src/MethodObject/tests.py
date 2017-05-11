@@ -40,13 +40,13 @@ def test_methodobject():
 class TestMethodObject(unittest.TestCase):
 
     def test_compilation(self):
-        from MethodObject import IS_PYPY, IS_PURE
-        if IS_PURE or IS_PYPY:
-            with self.assertRaises((AttributeError, ImportError)):
-                from MethodObject import _MethodObject
-        else:
+        from ExtensionClass import C_EXTENSION
+        if C_EXTENSION:
             from MethodObject import _MethodObject
             self.assertTrue(hasattr(_MethodObject, 'Method'))
+        else:
+            with self.assertRaises((AttributeError, ImportError)):
+                from MethodObject import _MethodObject
 
 
 def test_suite():
