@@ -6,6 +6,8 @@ Changelog
 
 - Fail if C extensions couldn't be compiled on compatible platforms.
 
+- add Appveyor configuration to automate building Windows eggs
+
 4.3.0 (2017-02-22)
 ------------------
 
