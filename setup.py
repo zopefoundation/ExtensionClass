@@ -24,10 +24,10 @@ with open('CHANGES.rst') as f:
     CHANGES = f.read()
 
 # PyPy won't build the extension.
-py_impl = getattr(platform, 'python_implementation', lambda: None)
+py_impl = platform.python_implementation
 is_pypy = py_impl() == 'PyPy'
-is_pure = 'PURE_PYTHON' in os.environ
-if is_pypy or is_pure:
+
+if is_pypy:
     ext_modules = []
 else:
     ext_modules = [
@@ -71,10 +71,16 @@ setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
     ext_modules=ext_modules,
     include_package_data=True,
     zip_safe=False,
+    extras_require={
+        'test': [
+            'zope.testrunner',
+        ],
+    },
 )

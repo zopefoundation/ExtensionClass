@@ -2,21 +2,23 @@ language: python
 sudo: false
 python:
     - 2.7
-    - 3.3
     - 3.4
     - 3.5
     - 3.6
     - pypy
-    - pypy3.3-5.2-alpha1
+    - pypy3
+matrix:
+    include:
+        - python: "2.7"
+          env: PURE_PYTHON=1
+        - python: "3.7"
+          dist: xenial
+          sudo: true
 install:
-    - pip install zc.buildout
-    - buildout bootstrap
-    - buildout
+    - pip install -U pip setuptools
+    - pip install -U -e .[test]
 script:
-    - bin/test -v1
+    - zope-testrunner --test-path=src
 notifications:
     email: false
-cache:
-  pip: true
-  directories:
-    - eggs/
+cache: pip

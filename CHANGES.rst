@@ -8,6 +8,8 @@ Changelog
 
 - add Appveyor configuration to automate building Windows eggs
 
+- Add support for Python 3.7.
+
 4.3.0 (2017-02-22)
 ------------------
 
@@ -106,7 +108,7 @@ Changelog
 2.11.2 (2009-08-02)
 -------------------
 
-- Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See 
+- Fixed 64-bit compatibility issues for Python 2.5.x / 2.6.x.  See
   http://www.python.org/dev/peps/pep-0353/ for details.
 
 2.11.1 (2009-02-19)

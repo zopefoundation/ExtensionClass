@@ -985,8 +985,8 @@ class Test_add_classic_mro(unittest.TestCase):
 class TestExtensionClass(unittest.TestCase):
 
     def test_compilation(self):
-        from ExtensionClass import C_EXTENSION
-        if C_EXTENSION:
+        from ExtensionClass import _IS_PYPY
+        if not _IS_PYPY:
             from ExtensionClass import _ExtensionClass
             self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
         else:
@@ -998,7 +998,5 @@ def test_suite():
     return unittest.TestSuite((
         DocTestSuite('ExtensionClass'),
         DocTestSuite(),
-        unittest.makeSuite(TestEffectivelyCooperativeBase),
-        unittest.makeSuite(Test_add_classic_mro),
-        unittest.makeSuite(TestExtensionClass),
+        unittest.defaultTestLoader.loadTestsFromName(__name__)
     ))
