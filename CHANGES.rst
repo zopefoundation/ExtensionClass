@@ -10,6 +10,11 @@ Changelog
 
 - Add support for Python 3.7.
 
+- Fix getting attributes that are data descriptors in the Python
+  implementation.
+
+- Reach and automatically maintain 100% test coverage.
+
 4.3.0 (2017-02-22)
 ------------------
 

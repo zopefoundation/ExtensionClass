@@ -168,14 +168,10 @@ def test__basicnew__():
     """
 
 
-def cmpattrs(self, other, *attrs):
-    for attr in attrs:
-        if attr[:3] in ('_v_', '_p_'):
-            continue
-        c = getattr(self, attr, None) == getattr(other, attr, None)
-        if c:
-            return c
-    return 0
+def eqattrs(self, other, *attrs):
+    self_data = [getattr(self, a, None) for a in attrs]
+    other_data = [getattr(other, a, None) for a in attrs]
+    return self_data == other_data
 
 
 class Simple(Base):
@@ -186,7 +182,7 @@ class Simple(Base):
         self._p_foo = 'bar'
 
     def __eq__(self, other):
-        return cmpattrs(self, other, '__class__', *(self.__dict__.keys()))
+        return eqattrs(self, other, '__class__', *(self.__dict__.keys()))
 
 
 def test_basic_pickling():
@@ -292,7 +288,7 @@ class SubSlotted(Slotted):
         self.s3 = s3
 
     def __eq__(self, other):
-        return cmpattrs(self, other, '__class__', 's1', 's2', 's3', 's4')
+        return eqattrs(self, other, '__class__', 's1', 's2', 's3', 's4')
 
 
 def test_pickling_w_slots_only():
@@ -346,7 +342,7 @@ class SubSubSlotted(SubSlotted):
         self._p_foo = 'bar'
 
     def __eq__(self, other):
-        return cmpattrs(self, other,
+        return eqattrs(self, other,
                         '__class__', 's1', 's2', 's3', 's4',
                         *(self.__dict__.keys()))
 
@@ -967,7 +963,7 @@ class Test_add_classic_mro(unittest.TestCase):
         self._callFUT(mro, _Derived)
         self.assertEqual(mro, [_Derived, _One, _Base, object, _Another])
 
-    @unittest.skipIf(sys.version_info[0] > 2, 'Py3k: no classic classes')
+
     def test_w_filled_mro_oldstyle_class_w_bases(self):
 
         class _Base:
@@ -979,19 +975,58 @@ class Test_add_classic_mro(unittest.TestCase):
         already = object()
         mro = [already]
         self._callFUT(mro, _Derived)
-        self.assertEqual(mro, [already, _Derived, _Base])
+        self.assertEqual(
+            mro,
+            [already, _Derived, _Base] + ([object] if sys.version_info[0] > 2 else []))
 
 
 class TestExtensionClass(unittest.TestCase):
 
     def test_compilation(self):
         from ExtensionClass import _IS_PYPY
-        if not _IS_PYPY:
+        try:
             from ExtensionClass import _ExtensionClass
-            self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
+        except ImportError:  # pragma: no cover
+            self.assertTrue(_IS_PYPY)
         else:
-            with self.assertRaises((AttributeError, ImportError)):
-                from ExtensionClass import _ExtensionClass
+            self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
+
+
+    def test_mro_classic_class(self):
+
+        class _Base:
+            pass
+
+        class _Derived(_Base, ExtensionClass):
+            pass
+
+
+        self.assertEqual(_Derived.__mro__,
+                         (_Derived, _Base, ExtensionClass, type, object))
+
+    def test_class_init(self):
+        class _Derived(ExtensionClass):
+            init = 0
+            def __class_init__(cls):
+                cls.init = 1
+        Derived = _Derived('Derived', (), {})
+        self.assertEqual(0, _Derived.init)
+        self.assertEqual(1, Derived.init)
+
+class TestBase(unittest.TestCase):
+
+    def test_data_descriptor(self):
+        class Descr(object):
+            def __get__(self, inst, klass):
+                return (inst, klass)
+            def __set__(self, value):
+                "Does nothing, needed to be a data descriptor"
+
+        class O(Base):
+            attr = Descr()
+
+        o = O()
+        self.assertEqual(o.attr, (o, O))
 
 
 def test_suite():
