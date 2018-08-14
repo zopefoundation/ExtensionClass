@@ -12,45 +12,40 @@
 #
 ##############################################################################
 
-from doctest import DocTestSuite
 import unittest
-
-
-def test_methodobject():
-    """
-    >>> from ExtensionClass import Base
-    >>> from MethodObject import Method
-
-    >>> class foo(Method):
-    ...     def __call__(self, ob, *args, **kw):
-    ...         print('called %s %s %s' % (ob, args, kw))
-
-    >>> class bar(Base):
-    ...     def __repr__(self):
-    ...         return "bar()"
-    ...     hi = foo()
-
-    >>> x = bar()
-    >>> hi = x.hi
-    >>> hi(1,2,3,name='spam')
-    called bar() (1, 2, 3) {'name': 'spam'}
-    """
 
 
 class TestMethodObject(unittest.TestCase):
 
     def test_compilation(self):
-        from ExtensionClass import C_EXTENSION
-        if C_EXTENSION:
+        from ExtensionClass import _IS_PYPY
+        try:
             from MethodObject import _MethodObject
-            self.assertTrue(hasattr(_MethodObject, 'Method'))
+        except ImportError: # pragma: no cover
+            self.assertTrue(_IS_PYPY)
         else:
-            with self.assertRaises((AttributeError, ImportError)):
-                from MethodObject import _MethodObject
+            self.assertTrue(hasattr(_MethodObject, 'Method'))
 
+    def test_methodobject(self):
+        from ExtensionClass import Base
+        from MethodObject import Method
+
+        class Callable(Method):
+            def __call__(self, ob, *args, **kw):
+                return (repr(ob), args, kw)
+
+        class ExClass(Base):
+            def __repr__(self):
+                return "bar()"
+
+            hi = Callable()
+
+        x = ExClass()
+        hi = x.hi
+        result = hi(1, 2, 3, name='spam')
+
+        self.assertEqual(result,
+                         ("bar()", (1, 2, 3), {'name': 'spam'}))
 
 def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(DocTestSuite())
-    suite.addTest(unittest.makeSuite(TestMethodObject))
-    return suite
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

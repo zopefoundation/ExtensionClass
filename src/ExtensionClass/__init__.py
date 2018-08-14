@@ -103,12 +103,12 @@ import os
 import platform
 import sys
 
-if sys.version_info > (3, ):  # pragma: no cover
+if sys.version_info > (3, ):
     import copyreg as copy_reg
-else:
+else: # pragma: no cover
     import copy_reg
 
-_IS_PYPY = getattr(platform, 'python_implementation', lambda: None)() == 'PyPy'
+_IS_PYPY = platform.python_implementation() == 'PyPy'
 _IS_PURE = 'PURE_PYTHON' in os.environ
 C_EXTENSION = not (_IS_PYPY or _IS_PURE)
 
@@ -148,9 +148,8 @@ def _add_classic_mro(mro, cls):
 
 class ExtensionClass(type):
 
-    def __new__(cls, name, bases=(), attrs={}):
-        global _Base, _NoInstanceDictionaryBase
-
+    def __new__(cls, name, bases=(), attrs=None):
+        attrs = {} if attrs is None else attrs
         # Make sure we have an ExtensionClass instance as a base
         if (name != 'Base' and
            not any(isinstance(b, ExtensionClass) for b in bases)):
@@ -180,10 +179,9 @@ class ExtensionClass(type):
         """Create a new empty object"""
         return self.__new__(self)
 
+
     def mro(self):
         """Compute an mro using the 'encapsulated base' scheme"""
-        global _Base, _NoInstanceDictionaryBase
-
         mro = [self]
         for base in self.__bases__:
             if hasattr(base, '__mro__'):
@@ -193,7 +191,7 @@ class ExtensionClass(type):
                     if c in mro:
                         continue
                     mro.append(c)
-            else:
+            else: # pragma: no cover (python 2 only)
                 _add_classic_mro(mro, base)
 
         if _NoInstanceDictionaryBase in self.__bases__:
@@ -232,7 +230,7 @@ def Base_getattro(self, name):
             descr = base.__dict__[name]
             break
 
-    if descr is not None and inspect.isdatadescriptor(base):
+    if descr is not None and inspect.isdatadescriptor(descr):
         return descr.__get__(self, type(self))
 
     try:
@@ -335,3 +333,11 @@ _NoInstanceDictionaryBase = NoInstanceDictionaryBase
 
 if C_EXTENSION:  # pragma no cover
     from ._ExtensionClass import *  # NOQA
+
+# We always want to get the CAPI2 value (if possible) so that
+# MethodObject and anything else using the PyExtensionClass_Export
+# macro from ExtensionClass.h doesn't break with an AttributeError
+try:
+    from ._ExtensionClass import CAPI2
+except ImportError: # pragma: no cover
+    pass

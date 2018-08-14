@@ -94,17 +94,15 @@ class TestComputedAttribute(unittest.TestCase):
         self.assertIsInstance(x.a, ComputedAttribute)
 
     def test_compilation(self):
-        from ExtensionClass import C_EXTENSION
-        if C_EXTENSION:
+        from ExtensionClass import _IS_PYPY
+        try:
             from ComputedAttribute import _ComputedAttribute
-            self.assertTrue(hasattr(_ComputedAttribute, 'ComputedAttribute'))
+        except ImportError: # pragma: no cover
+            self.assertTrue(_IS_PYPY)
         else:
-            with self.assertRaises((AttributeError, ImportError)):
-                from ComputedAttribute import _ComputedAttribute
-
+            self.assertTrue(hasattr(_ComputedAttribute, 'ComputedAttribute'))
 
 def test_suite():
-    suite = unittest.TestSuite()
+    suite = unittest.defaultTestLoader.loadTestsFromName(__name__)
     suite.addTest(DocTestSuite())
-    suite.addTest(unittest.makeSuite(TestComputedAttribute))
     return suite
