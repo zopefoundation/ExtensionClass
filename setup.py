@@ -45,12 +45,12 @@ else:
                   include_dirs=['src']),
     ]
 
-__version__ = '4.4.0.dev0'
+version = '4.4'
 
 setup(
     name='ExtensionClass',
-    version=__version__,
-    url='http://pypi.python.org/pypi/ExtensionClass',
+    version=version,
+    url='https://github.com/zopefoundation/ExtensionClass',
     license='ZPL 2.1',
     description='Metaclass for subclassable extension types',
     author='Zope Foundation and Contributors',

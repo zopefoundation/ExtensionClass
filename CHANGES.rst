@@ -1,12 +1,12 @@
 Changelog
 =========
 
-4.4.0 (unreleased)
-------------------
+4.4 (2018-10-05)
+----------------
 
 - Fail if C extensions couldn't be compiled on compatible platforms.
 
-- add Appveyor configuration to automate building Windows eggs
+- Add Appveyor configuration to automate building Windows eggs
 
 - Add support for Python 3.7.
 
