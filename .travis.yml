@@ -11,6 +11,14 @@ jobs:
     include:
         - python: "3.7"
           env: PURE_PYTHON=1
+        - python: "2.7"
+          env: PURE_PYTHON=1
+        - python: "3.9-dev"
+          # needed until https://travis-ci.com/icemac/test-travis-dev is green
+          before_install:
+            - /opt/python/3.9-dev/bin/python -m venv py39
+            - . py39/bin/activate
+
 install:
     - pip install -U pip setuptools
     - pip install -U coverage coveralls
