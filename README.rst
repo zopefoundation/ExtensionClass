@@ -6,7 +6,7 @@ ExtensionClass
 
 This package provides a metaclass that allows classes implemented in
 extension modules to be subclassed in Python.  Unless you need
-ExtensionClasses for legacy applications (e.g. Zope 2), you probably
+ExtensionClasses for legacy applications (e.g. Zope), you probably
 want to use Python's new-style classes (available since Python 2.2).
 
 ComputedAttribute
