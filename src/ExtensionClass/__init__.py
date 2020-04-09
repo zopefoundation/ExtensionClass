@@ -223,39 +223,57 @@ class ExtensionClass(type):
 # hierarchy. This means the Base_* methods effectively don't have
 # to care or worry about using super(): it's always object.
 
-def Base_getattro(self, name):
-    descr = None
+def Base_getattro(self, name, _marker=object()):
+    descr = marker = _marker
 
+    # XXX: Why is this looping manually? The C code uses ``_PyType_Lookup``,
+    # which is an internal function, but equivalent to ``getattr(type(self), name)``.
     for base in type(self).__mro__:
         if name in base.__dict__:
             descr = base.__dict__[name]
             break
 
-    if descr is not None and inspect.isdatadescriptor(descr):
+    # A data descriptor in the type has full control.
+    if descr is not marker and inspect.isdatadescriptor(descr):
         return descr.__get__(self, type(self))
 
+    # descr either wasn't defined, or it's not a data descriptor.
     try:
         # Don't do self.__dict__ otherwise you get recursion.
+        # Not all instances will have dictionaries.
         inst_dict = object.__getattribute__(self, '__dict__')
     except AttributeError:
         pass
     else:
-        if name in inst_dict:
+        try:
             descr = inst_dict[name]
-            # If the tp_descr_get of res is of_get, then call it.
-            if name == '__parent__' or not isinstance(descr, Base):
+        except KeyError:
+            pass
+        else:
+            # If the tp_descr_get of res is of_get, then call it,
+            # unless it is __parent__ --- we don't want to wrap that.
+            # XXX: This isn't quite what the C implementation does. It actually
+            # checks the get function. Here we test the type.
+            if name == '__parent__' or not isinstance(descr, BasePy):
                 return descr
 
-    if descr is not None:
-        descr_get = getattr(descr, '__get__', None)
-        if descr_get is None:
+    # Here, descr could be either a non-data descriptor
+    # from the class dictionary, or *any* kind of object
+    # from the instance dictionary. Unlike the way normal
+    # Python classes handle non-data descriptors, we will invoke
+    # __get__ even if it was found in the instance dictionary.
+    if descr is not marker:
+        try:
+            descr_get = descr.__get__
+        except AttributeError:
             return descr
 
         return descr_get(self, type(self))
 
     raise AttributeError(
-            "'%.50s' object has not attribute '%s'",
-            type(self).__name__, name)
+        "'%.50s' object has no attribute '%s'" % (
+            type(self).__name__, name
+        ))
 
 
 def _slotnames(self):
