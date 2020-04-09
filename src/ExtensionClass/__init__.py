@@ -132,10 +132,11 @@ def pmc_init_of(cls):
            (get is of_get or getattr(get, '__func__', None) is of_get)):
             del cls.__get__
 
+pmc_init_of_py = pmc_init_of
 
-_Base = type('dummy', (), {})
-_NoInstanceDictionaryBase = type('dummy', (), {})
-
+BasePy = type('dummy', (), {'__slots__': ()})
+NoInstanceDictionaryBasePy = type('dummy', (), {'__slots__': ()})
+ExtensionClassPy = type('dummy', (), {'__slots__': ()})
 
 def _add_classic_mro(mro, cls):
     if cls not in mro:
@@ -152,11 +153,11 @@ class ExtensionClass(type):
         attrs = {} if attrs is None else attrs
         # Make sure we have an ExtensionClass instance as a base
         if (name != 'Base' and
-           not any(isinstance(b, ExtensionClass) for b in bases)):
-            bases += (_Base,)
+            not any(isinstance(b, ExtensionClassPy) for b in bases)):
+            bases += (BasePy,)
         if ('__slots__' not in attrs and
-           any(issubclass(b, _NoInstanceDictionaryBase) for b in bases)):
-            attrs['__slots__'] = []
+            any(issubclass(b, NoInstanceDictionaryBasePy) for b in bases)):
+            attrs['__slots__'] = ()
 
         cls = type.__new__(cls, name, bases, attrs)
 
@@ -165,7 +166,7 @@ class ExtensionClass(type):
             cls.__doc__ = super(cls, cls).__doc__
 
         # set up __get__ if __of__ is implemented
-        pmc_init_of(cls)
+        pmc_init_of_py(cls)
 
         # call class init method
         if hasattr(cls, '__class_init__'):
@@ -186,7 +187,7 @@ class ExtensionClass(type):
         for base in self.__bases__:
             if hasattr(base, '__mro__'):
                 for c in base.__mro__:
-                    if c in (_Base, _NoInstanceDictionaryBase, object):
+                    if c in (BasePy, NoInstanceDictionaryBasePy, object):
                         continue
                     if c in mro:
                         continue
@@ -194,10 +195,10 @@ class ExtensionClass(type):
             else: # pragma: no cover (python 2 only)
                 _add_classic_mro(mro, base)
 
-        if _NoInstanceDictionaryBase in self.__bases__:
-            mro.append(_NoInstanceDictionaryBase)
+        if NoInstanceDictionaryBasePy in self.__bases__:
+            mro.append(NoInstanceDictionaryBasePy)
         elif self.__name__ != 'Base':
-            mro.append(_Base)
+            mro.append(BasePy)
         mro.append(object)
         return mro
 
@@ -321,15 +322,16 @@ Base = ExtensionClass("Base", (object, ), {
     '__new__': Base__new__,
 })
 
-_Base = Base
+
 
 
 class NoInstanceDictionaryBase(Base):
     __slots__ = ()
 
 
-_NoInstanceDictionaryBase = NoInstanceDictionaryBase
-
+BasePy = Base
+ExtensionClassPy = ExtensionClass
+NoInstanceDictionaryBasePy = NoInstanceDictionaryBase
 
 if C_EXTENSION:  # pragma no cover
     from ._ExtensionClass import *  # NOQA
