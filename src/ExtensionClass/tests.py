@@ -17,7 +17,8 @@ from doctest import DocTestSuite
 import sys
 import unittest
 
-from ExtensionClass import *  # NOQA
+from ExtensionClass import Base
+from ExtensionClass import ExtensionClass
 
 
 def print_dict(d):
@@ -133,32 +134,49 @@ def proper_error_on_deleattr():
     """
 
 
-def test_NoInstanceDictionaryBase():
-    """
-    >>> class B(NoInstanceDictionaryBase): pass
-    ...
-    >>> B().__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-    ...
-    AttributeError: ...
-    >>> class B(NoInstanceDictionaryBase):
-    ...   __slots__ = ('a', 'b')
-    ...
-    >>> class BB(B): pass
-    ...
-    >>> b = BB()
-    >>> b.__dict__  # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-    ...
-    AttributeError: ...
-    >>> b.a = 1
-    >>> b.b = 2
-    >>> b.a
-    1
-    >>> b.b
-    2
-    """
+class TestNoInstanceDictionaryBase(unittest.TestCase):
 
+    def _getTargetClass(self):
+        from ExtensionClass import NoInstanceDictionaryBase
+        return NoInstanceDictionaryBase
+
+    def test_subclass_has_no_dict(self):
+        class B(self._getTargetClass()):
+            pass
+        b = B()
+        with self.assertRaises(AttributeError):
+            getattr(b, '__dict__')
+        return B
+
+    def test_slots_and_grandchild(self):
+        class B(self._getTargetClass()):
+            __slots__ = ('a', 'b')
+
+        class BB(B):
+            pass
+
+        b = BB()
+        with self.assertRaises(AttributeError):
+            getattr(b, '__dict__')
+
+        b.a = 1
+        b.b = 2
+        self.assertEqual(b.a, 1)
+        self.assertEqual(b.b, 2)
+        with self.assertRaises(AttributeError):
+            getattr(b, '__dict__')
+
+
+class TestNoInstanceDictionaryBasePy(TestNoInstanceDictionaryBase):
+
+    def _getTargetClass(self):
+        from ExtensionClass import NoInstanceDictionaryBasePy
+        return NoInstanceDictionaryBasePy
+
+    def test_subclass_has_no_dict(self):
+        B = super(TestNoInstanceDictionaryBasePy, self).test_subclass_has_no_dict()
+        # In Python, we implement this by adding an empty __slots__
+        self.assertEqual(B.__slots__, ())
 
 def test__basicnew__():
     """
@@ -343,8 +361,8 @@ class SubSubSlotted(SubSlotted):
 
     def __eq__(self, other):
         return eqattrs(self, other,
-                        '__class__', 's1', 's2', 's3', 's4',
-                        *(self.__dict__.keys()))
+                       '__class__', 's1', 's2', 's3', 's4',
+                       *(self.__dict__.keys()))
 
 
 def test_pickling_w_slots():
@@ -982,6 +1000,9 @@ class Test_add_classic_mro(unittest.TestCase):
 
 class TestExtensionClass(unittest.TestCase):
 
+    def _getTargetClass(self):
+        return ExtensionClass
+
     def test_compilation(self):
         from ExtensionClass import _IS_PYPY
         try:
@@ -997,15 +1018,15 @@ class TestExtensionClass(unittest.TestCase):
         class _Base:
             pass
 
-        class _Derived(_Base, ExtensionClass):
+        class _Derived(_Base, self._getTargetClass()):
             pass
 
 
         self.assertEqual(_Derived.__mro__,
-                         (_Derived, _Base, ExtensionClass, type, object))
+                         (_Derived, _Base, self._getTargetClass(), type, object))
 
     def test_class_init(self):
-        class _Derived(ExtensionClass):
+        class _Derived(self._getTargetClass()):
             init = 0
             def __class_init__(cls):
                 cls.init = 1
@@ -1013,7 +1034,21 @@ class TestExtensionClass(unittest.TestCase):
         self.assertEqual(0, _Derived.init)
         self.assertEqual(1, Derived.init)
 
+
+class TestExtensionClassPy(TestExtensionClass):
+
+    def _getTargetClass(self):
+        from ExtensionClass import ExtensionClassPy
+        return ExtensionClassPy
+
+
 class TestBase(unittest.TestCase):
+
+    def _getTargetClass(self):
+        return Base
+
+    def _getExtensionClass(self):
+        return ExtensionClass
 
     def test_data_descriptor(self):
         class Descr(object):
@@ -1022,11 +1057,42 @@ class TestBase(unittest.TestCase):
             def __set__(self, value):
                 "Does nothing, needed to be a data descriptor"
 
-        class O(Base):
+        class O(self._getTargetClass()):
             attr = Descr()
 
         o = O()
         self.assertEqual(o.attr, (o, O))
+
+    def __check_class_attribute(self, name, class_value):
+        cls = type('O', (self._getTargetClass(),), {name: class_value})
+        self.assertEqual(getattr(cls, name), class_value)
+        self.assertIsInstance(cls, self._getExtensionClass())
+        self.assertTrue(issubclass(cls, self._getTargetClass()))
+
+        inst = cls()
+        self.assertIsInstance(inst, self._getTargetClass())
+        self.assertEqual(getattr(inst, name), class_value)
+        setattr(inst, name, self)
+        self.assertIs(getattr(inst, name), self)
+
+    def test_class_attributes(self):
+        # parent has some special handling
+        self.__check_class_attribute('__parent__', None)
+        self.__check_class_attribute('__parent__', 'not-none')
+
+        self.__check_class_attribute('nothing_special', None)
+        self.__check_class_attribute('nothing_special', 'not-none')
+
+
+class TestBasePy(TestBase):
+
+    def _getTargetClass(self):
+        from ExtensionClass import BasePy
+        return BasePy
+
+    def _getExtensionClass(self):
+        from ExtensionClass import ExtensionClassPy
+        return ExtensionClassPy
 
 
 def test_suite():
