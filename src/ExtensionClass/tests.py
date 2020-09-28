@@ -24,7 +24,7 @@ from ExtensionClass import ExtensionClass
 def print_dict(d):
     d = d.items()
     print('{%s}' % (', '.join(
-        [('%r: %r' % (k, v)) for (k, v) in sorted(d)]
+        [('{!r}: {!r}'.format(k, v)) for (k, v) in sorted(d)]
     )))
 
 
@@ -920,7 +920,7 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
         class YouShallNotPass(Exception):
             pass
 
-        class NoAttributes(object):
+        class NoAttributes:
             def __getattribute__(self, name):
                 raise YouShallNotPass()
 
@@ -944,7 +944,7 @@ class Test_add_classic_mro(unittest.TestCase):
 
     def test_w_empty_mro_newstyle_class_no_bases(self):
 
-        class _Class(object):
+        class _Class:
             pass
 
         mro = []
@@ -953,7 +953,7 @@ class Test_add_classic_mro(unittest.TestCase):
 
     def test_w_empty_mro_newstyle_class_w_bases(self):
 
-        class _Base(object):
+        class _Base:
             pass
 
         class _Derived(_Base):
@@ -965,7 +965,7 @@ class Test_add_classic_mro(unittest.TestCase):
 
     def test_w_empty_mro_newstyle_class_w_diamond_inheritance(self):
 
-        class _Base(object):
+        class _Base:
             pass
 
         class _One(_Base):
@@ -995,7 +995,7 @@ class Test_add_classic_mro(unittest.TestCase):
         self._callFUT(mro, _Derived)
         self.assertEqual(
             mro,
-            [already, _Derived, _Base] + ([object] if sys.version_info[0] > 2 else []))
+            [already, _Derived, _Base, object])
 
 
 class TestExtensionClass(unittest.TestCase):
@@ -1051,7 +1051,7 @@ class TestBase(unittest.TestCase):
         return ExtensionClass
 
     def test_data_descriptor(self):
-        class Descr(object):
+        class Descr:
             def __get__(self, inst, klass):
                 return (inst, klass)
             def __set__(self, value):

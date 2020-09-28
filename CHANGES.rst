@@ -5,7 +5,7 @@
 5.0 (unreleased)
 ================
 
-- Drop support for Python 3.5
+- Drop support for Python 2 and 3.5.
 
 - Drop support for Python 3.4
 
