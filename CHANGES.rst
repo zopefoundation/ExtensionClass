@@ -2,10 +2,12 @@
  Changelog
 ===========
 
-4.5.0 (unreleased)
-==================
+5.0 (unreleased)
+================
 
-- Drop support for Python 3.4 and 3.5
+- Drop support for Python 3.5
+
+- Drop support for Python 3.4
 
 - Add support for Python 3.8.
 
