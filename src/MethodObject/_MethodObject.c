@@ -28,12 +28,13 @@ of(PyObject *self, PyObject *args)
 }
 
 struct PyMethodDef Method_methods[] = {
-  {"__of__",(PyCFunction)of,METH_VARARGS,""},
+  {"__of__",(PyCFunction)of,METH_VARARGS,""},  
   {NULL,		NULL}		/* sentinel */
 };
 
 static struct PyMethodDef methods[] = {{NULL,	NULL}};
 
+#ifdef PY3K
 static struct PyModuleDef moduledef =
 {
     PyModuleDef_HEAD_INIT,
@@ -46,6 +47,7 @@ static struct PyModuleDef moduledef =
     NULL,                                       /* m_clear */
     NULL,                                       /* m_free */
 };
+#endif
 
 
 static PyObject*
@@ -64,7 +66,14 @@ module_init(void)
 	"to implement (or inherit) a __call__ method.\n",
 	Method_methods);
 
+#ifdef PY3K
   m = PyModule_Create(&moduledef);
+#else
+  m = Py_InitModule3(
+        "_MethodObject",
+        methods,
+		"Method-object mix-in class module\n\n");
+#endif
 
   if (m == NULL) {
       return NULL;
@@ -80,7 +89,14 @@ module_init(void)
   return m;
 }
 
+#ifdef PY3K
 PyMODINIT_FUNC PyInit__MethodObject(void)
 {
     return module_init();
 }
+#else
+PyMODINIT_FUNC init_MethodObject(void)
+{
+    module_init();
+}
+#endif

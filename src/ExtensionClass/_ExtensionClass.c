@@ -11,7 +11,7 @@
  FOR A PARTICULAR PURPOSE.
 
 */
-static char _extensionclass_module_documentation[] =
+static char _extensionclass_module_documentation[] = 
 "ExtensionClass\n"
 "\n"
 "$Id$\n"
@@ -51,6 +51,19 @@ Base_getattro(PyObject *obj, PyObject *name)
     PyObject **dictptr;
 
     if (!NATIVE_CHECK(name)) {
+#ifndef PY3K
+#ifdef Py_USING_UNICODE
+        /* The Unicode to string conversion is done here because the
+           existing tp_setattro slots expect a string object as name
+           and we wouldn't want to break those. */
+        if (PyUnicode_Check(name)) {
+            name = PyUnicode_AsEncodedString(name, NULL, NULL);
+            if (name == NULL)
+                return NULL;
+        }
+        else
+#endif
+#endif
         {
             PyErr_Format(PyExc_TypeError,
                          "attribute name must be string, not '%.200s'",
@@ -123,9 +136,15 @@ Base_getattro(PyObject *obj, PyObject *name)
         goto done;
     }
 
+#ifdef PY3K
     PyErr_Format(PyExc_AttributeError,
                  "'%.50s' object has no attribute '%U'",
                  tp->tp_name, name);
+#else
+    PyErr_Format(PyExc_AttributeError,
+                 "'%.50s' object has no attribute '%.400s'",
+                 tp->tp_name, PyString_AS_STRING(name));
+#endif
 
   done:
     Py_DECREF(name);
@@ -239,7 +258,7 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
 
   if (kw && PyObject_IsTrue(kw))
     {
-      PyErr_SetString(PyExc_TypeError,
+      PyErr_SetString(PyExc_TypeError, 
                       "Keyword arguments are not supported");
         return NULL;
     }
@@ -253,7 +272,7 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
     {
       for (i = 0; i < PyTuple_GET_SIZE(bases); i++)
         {
-          if (PyObject_TypeCheck(PyTuple_GET_ITEM(bases, i),
+          if (PyObject_TypeCheck(PyTuple_GET_ITEM(bases, i), 
                                  &ExtensionClassType))
             {
               have_base = 1;
@@ -271,7 +290,7 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
               PyTuple_SET_ITEM(new_bases, i, PyTuple_GET_ITEM(bases, i));
             }
           Py_INCREF(OBJECT(&BaseType));
-          PyTuple_SET_ITEM(new_bases, PyTuple_GET_SIZE(bases),
+          PyTuple_SET_ITEM(new_bases, PyTuple_GET_SIZE(bases), 
                            OBJECT(&BaseType));
         }
     }
@@ -282,7 +301,7 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
         return NULL;
     }
 
-
+  
 
   if (new_bases)
     {
@@ -309,10 +328,10 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
       for (i = 0; i < PyTuple_GET_SIZE(bases); i++)
         {
           if (
-              PyObject_TypeCheck(PyTuple_GET_ITEM(bases, i),
+              PyObject_TypeCheck(PyTuple_GET_ITEM(bases, i), 
                                  &ExtensionClassType)
               &&
-              PyType_IsSubtype(TYPE(PyTuple_GET_ITEM(bases, i)),
+              PyType_IsSubtype(TYPE(PyTuple_GET_ITEM(bases, i)), 
                                &NoInstanceDictionaryBaseType)
               )
             {
@@ -364,13 +383,13 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   PyObject *__class_init__, *r;
   PyObject* func = NULL;
 
-  if (PyType_Type.tp_init(OBJECT(self), args, kw) < 0)
-    return -1;
+  if (PyType_Type.tp_init(OBJECT(self), args, kw) < 0) 
+    return -1; 
 
   if (self->tp_dict != NULL)
     {
       r = PyDict_GetItemString(self->tp_dict, "__doc__");
-      if ((r == Py_None) &&
+      if ((r == Py_None) && 
           (PyDict_DelItemString(self->tp_dict, "__doc__") < 0)
           )
         return -1;
@@ -393,9 +412,11 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   else if (PyMethod_Check(__class_init__)) {
       func = PyMethod_GET_FUNCTION(__class_init__);
   }
+#ifdef PY3K
   else if (PyInstanceMethod_Check(__class_init__)) {
       func = PyInstanceMethod_GET_FUNCTION(__class_init__);
   }
+#endif
 
   if (func == NULL) {
       Py_DECREF(__class_init__);
@@ -408,7 +429,7 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   if (! r)
     return -1;
   Py_DECREF(r);
-
+  
   return 0;
 }
 
@@ -520,7 +541,7 @@ copy_mro(PyObject *mro, PyObject *result)
   int i, l;
 
   l = PyTuple_Size(mro);
-  if (l < 0)
+  if (l < 0) 
     return -1;
 
   for (i=0; i < l; i++)
@@ -532,7 +553,7 @@ copy_mro(PyObject *mro, PyObject *result)
   return 0;
 }
 
-static int
+static int 
 copy_classic(PyObject *base, PyObject *result)
 {
   PyObject *bases, *basebase;
@@ -546,7 +567,7 @@ copy_classic(PyObject *base, PyObject *result)
     return -1;
 
   l = PyTuple_Size(bases);
-  if (l < 0)
+  if (l < 0) 
     goto end;
 
   for (i=0; i < l; i++)
@@ -557,7 +578,7 @@ copy_classic(PyObject *base, PyObject *result)
     }
 
   err = 0;
-
+ 
  end:
   Py_DECREF(bases);
   return err;
@@ -576,7 +597,7 @@ mro(PyTypeObject *self)
   if (PyList_Append(result, OBJECT(self)) < 0)
     goto end;
   l = PyTuple_Size(self->tp_bases);
-  if (l < 0)
+  if (l < 0) 
     goto end;
   for (i=0; i < l; i++)
     {
@@ -616,18 +637,18 @@ mro(PyTypeObject *self)
       Py_INCREF(PyList_GET_ITEM(result, i));
       PyTuple_SET_ITEM(mro, i, PyList_GET_ITEM(result, i));
     }
-
+ 
  end:
   Py_DECREF(result);
   return mro;
 }
 
 static struct PyMethodDef EC_methods[] = {
-  {"__basicnew__", (PyCFunction)__basicnew__, METH_NOARGS,
+  {"__basicnew__", (PyCFunction)__basicnew__, METH_NOARGS, 
    "Create a new empty object"},
-  {"inheritedAttribute", (PyCFunction)inheritedAttribute, METH_O,
+  {"inheritedAttribute", (PyCFunction)inheritedAttribute, METH_O, 
    "Look up an inherited attribute"},
-  {"mro", (PyCFunction)mro, METH_NOARGS,
+  {"mro", (PyCFunction)mro, METH_NOARGS, 
    "Compute an mro using the 'encalsulated base' scheme"},
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
@@ -705,7 +726,7 @@ pmc_init_of(PyObject *self, PyObject *args)
 
 static struct PyMethodDef ec_methods[] = {
   {"debug", (PyCFunction)debug, METH_O, ""},
-  {"pmc_init_of", (PyCFunction)pmc_init_of, METH_VARARGS,
+  {"pmc_init_of", (PyCFunction)pmc_init_of, METH_VARARGS, 
    "Initialize __get__ for classes that define __of__"},
   {NULL,	 (PyCFunction)NULL, 0, NULL}		/* sentinel */
   };
@@ -715,7 +736,7 @@ static PyObject *
 EC_findiattrs_(PyObject *self, char *cname)
 {
   PyObject *name, *r;
-
+  
   name = NATIVE_FROM_STRING(cname);
   if (name == NULL)
     return NULL;
@@ -750,7 +771,7 @@ ec_init(PyObject *self, PyObject *args, PyObject *kw)
   __init__ = PyObject_GetAttr(self, str__init__);
   if (__init__ == NULL)
     return -1;
-
+    
   r = PyObject_Call(__init__, args, kw);
   Py_DECREF(__init__);
   if (r == NULL)
@@ -767,12 +788,12 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
   PyMethodDef *pure_methods = NULL, *mdef = NULL;
   PyObject *m;
 
-  if (typ->tp_flags == 0)
-    {
+  if (typ->tp_flags == 0) 
+    { 
       /* Old-style EC */
 
-      if (typ->tp_traverse)
-        {
+      if (typ->tp_traverse) 
+        { 
           /* ExtensionClasses stick there methods in the tp_traverse slot */
           mdef = (PyMethodDef *)typ->tp_traverse;
 
@@ -782,7 +803,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           else
             typ->tp_methods = mdef;
 
-          typ->tp_traverse = NULL;
+          typ->tp_traverse = NULL; 
 
           /* Look for __init__ method  */
           for (; mdef->ml_name; mdef++)
@@ -794,7 +815,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
                   break;
                 }
             }
-        }
+        } 
 
       if (typ->tp_clear)
         {
@@ -806,10 +827,10 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           if ((ecflags & EXTENSIONCLASS_BINDABLE_FLAG)
               && typ->tp_descr_get == NULL)
             /* We have __of__-style binding */
-            typ->tp_descr_get = of_get;
+            typ->tp_descr_get = of_get; 
         }
-      typ->tp_clear = NULL;
-      typ->tp_flags = Py_TPFLAGS_DEFAULT
+      typ->tp_clear = NULL; 
+      typ->tp_flags = Py_TPFLAGS_DEFAULT 
                     | Py_TPFLAGS_BASETYPE;
 
       if (typ->tp_dealloc != NULL)
@@ -825,10 +846,10 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
   typ->tp_basicsize += typ->tp_base->tp_basicsize;
 
   if (typ->tp_new == NULL)
-    typ->tp_new = PyType_GenericNew;
+    typ->tp_new = PyType_GenericNew; 
 
-  if (PyType_Ready(typ) < 0)
-    return -1;
+  if (PyType_Ready(typ) < 0) 
+    return -1; 
 
   if (pure_methods)
     {
@@ -840,13 +861,17 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           m = PyDescr_NewMethod(ECBaseType, pure_methods);
           if (! m)
             return -1;
+          #ifdef PY3K
             m = PyInstanceMethod_New((PyObject*) m);
+          #else
+            m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
+          #endif
           if (! m)
             return -1;
-          if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m)
+          if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m) 
               < 0)
             return -1;
-        }
+        }      
       PyType_Modified(typ);
     }
   else if (mdef && mdef->ml_name)
@@ -863,8 +888,8 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
       PyType_Modified(typ);
     }
 
-  if (PyMapping_SetItemString(dict, name, (PyObject*)typ) < 0)
-    return -1;
+  if (PyMapping_SetItemString(dict, name, (PyObject*)typ) < 0)  
+    return -1; 
 
   return 0;
 }
@@ -874,7 +899,7 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
 {
   if (! PyExtensionInstance_Check(inst))
     {
-      PyErr_SetString(PyExc_TypeError,
+      PyErr_SetString(PyExc_TypeError, 
                       "Can't bind non-ExtensionClass instance.");
       return NULL;
     }
@@ -890,11 +915,22 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
           return callable;
         }
       else {
+          #ifdef PY3K
             return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
+          #else
+            return PyMethod_New(
+                PyMethod_GET_FUNCTION(callable),
+                inst,
+                PyMethod_GET_CLASS(callable));
+          #endif
       }
     }
   else {
+    #ifdef PY3K
         return PyMethod_New(callable, inst);
+    #else
+        return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
+    #endif
   }
 }
 
@@ -907,6 +943,7 @@ TrueExtensionClassCAPI = {
   &ExtensionClassType,
 };
 
+#ifdef PY3K
 static struct PyModuleDef moduledef =
 {
     PyModuleDef_HEAD_INIT,
@@ -919,6 +956,7 @@ static struct PyModuleDef moduledef =
     NULL,                                   /* m_clear */
     NULL,                                   /* m_free */
 };
+#endif
 
 static PyObject*
 module_init(void)
@@ -949,7 +987,7 @@ module_init(void)
   ExtensionClassType.tp_basicsize = PyType_Type.tp_basicsize;
   ExtensionClassType.tp_traverse = PyType_Type.tp_traverse;
   ExtensionClassType.tp_clear = PyType_Type.tp_clear;
-
+  
   /* Initialize types: */
   if (PyType_Ready(&ExtensionClassType) < 0)
     return NULL;
@@ -969,9 +1007,14 @@ module_init(void)
 
   if (PyType_Ready(&NoInstanceDictionaryBaseType) < 0)
     return NULL;
-
+  
   /* Create the module and add the functions */
+#ifdef PY3K
   m = PyModule_Create(&moduledef);
+#else
+  m = Py_InitModule3("_ExtensionClass", ec_methods,
+                     _extensionclass_module_documentation);
+#endif
 
   if (m == NULL)
     return NULL;
@@ -998,7 +1041,14 @@ module_init(void)
   return m;
 }
 
+#ifdef PY3K
 PyMODINIT_FUNC PyInit__ExtensionClass(void)
 {
     return module_init();
 }
+#else
+PyMODINIT_FUNC init_ExtensionClass(void)
+{
+    module_init();
+}
+#endif

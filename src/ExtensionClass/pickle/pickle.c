@@ -28,7 +28,11 @@ pickle_setup(void)
     INIT_STRING(__getstate__);
 #undef INIT_STRING
 
+#ifdef PY3K
     copy_reg = PyImport_ImportModule("copyreg");
+#else
+    copy_reg = PyImport_ImportModule("copy_reg");
+#endif
 
     if (!copy_reg) {
         return -1;
@@ -107,14 +111,22 @@ pickle_copy_dict(PyObject *state)
     while (PyDict_Next(state, &pos, &key, &value))
     {
         int is_special;
+#ifdef PY3K
         if (key && PyUnicode_Check(key))
         {
             PyObject *converted = convert_name(key);
             ckey = PyBytes_AS_STRING(converted);
+#else
+        if (key && PyBytes_Check(key))
+        {
+            ckey = PyBytes_AS_STRING(key);
+#endif
             is_special = (*ckey == '_' &&
                           (ckey[1] == 'v' || ckey[1] == 'p') &&
                            ckey[2] == '_');
+#ifdef PY3K
             Py_DECREF(converted);
+#endif
             if (is_special) /* skip volatile and persistent */
                 continue;
         }
@@ -181,14 +193,22 @@ pickle___getstate__(PyObject *self)
             int is_special;
 
             name = PyList_GET_ITEM(slotnames, i);
+#ifdef PY3K
             if (PyUnicode_Check(name))
             {
                 PyObject *converted = convert_name(name);
                 cname = PyBytes_AS_STRING(converted);
+#else
+            if (PyBytes_Check(name))
+            {
+                cname = PyBytes_AS_STRING(name);
+#endif
                 is_special = (*cname == '_' &&
                               (cname[1] == 'v' || cname[1] == 'p') &&
                                cname[2] == '_');
+#ifdef PY3K
                 Py_DECREF(converted);
+#endif
                 if (is_special) /* skip volatile and persistent */
                 {
                     continue;
@@ -277,7 +297,7 @@ pickle___setstate__(PyObject *self, PyObject *state)
         Py_ssize_t i;
 
         dict = _PyObject_GetDictPtr(self);
-
+        
         if (!dict)
         {
             PyErr_SetString(PyExc_TypeError,
@@ -400,7 +420,7 @@ convert_name(PyObject *name)
 
 #define PICKLE_SETSTATE_DEF \
 {"__setstate__", (PyCFunction)pickle___setstate__, METH_O,           \
-   pickle___setstate__doc},
+   pickle___setstate__doc},                                          
 
 #define PICKLE_GETNEWARGS_DEF
 
