@@ -103,10 +103,7 @@ import os
 import platform
 import sys
 
-if sys.version_info > (3, ):
-    import copyreg as copy_reg
-else: # pragma: no cover
-    import copy_reg
+import copyreg as copy_reg
 
 _IS_PYPY = platform.python_implementation() == 'PyPy'
 _IS_PURE = 'PURE_PYTHON' in os.environ
@@ -359,5 +356,5 @@ if C_EXTENSION:  # pragma no cover
 # macro from ExtensionClass.h doesn't break with an AttributeError
 try:
     from ._ExtensionClass import CAPI2
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
