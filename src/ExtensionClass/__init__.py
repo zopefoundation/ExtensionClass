@@ -132,10 +132,11 @@ def pmc_init_of(cls):
            (get is of_get or getattr(get, '__func__', None) is of_get)):
             del cls.__get__
 
+pmc_init_of_py = pmc_init_of
 
-_Base = type('dummy', (), {})
-_NoInstanceDictionaryBase = type('dummy', (), {})
-
+BasePy = type('dummy', (), {'__slots__': ()})
+NoInstanceDictionaryBasePy = type('dummy', (), {'__slots__': ()})
+ExtensionClassPy = type('dummy', (), {'__slots__': ()})
 
 def _add_classic_mro(mro, cls):
     if cls not in mro:
@@ -152,11 +153,11 @@ class ExtensionClass(type):
         attrs = {} if attrs is None else attrs
         # Make sure we have an ExtensionClass instance as a base
         if (name != 'Base' and
-           not any(isinstance(b, ExtensionClass) for b in bases)):
-            bases += (_Base,)
+            not any(isinstance(b, ExtensionClassPy) for b in bases)):
+            bases += (BasePy,)
         if ('__slots__' not in attrs and
-           any(issubclass(b, _NoInstanceDictionaryBase) for b in bases)):
-            attrs['__slots__'] = []
+            any(issubclass(b, NoInstanceDictionaryBasePy) for b in bases)):
+            attrs['__slots__'] = ()
 
         cls = type.__new__(cls, name, bases, attrs)
 
@@ -165,7 +166,7 @@ class ExtensionClass(type):
             cls.__doc__ = super(cls, cls).__doc__
 
         # set up __get__ if __of__ is implemented
-        pmc_init_of(cls)
+        pmc_init_of_py(cls)
 
         # call class init method
         if hasattr(cls, '__class_init__'):
@@ -186,7 +187,7 @@ class ExtensionClass(type):
         for base in self.__bases__:
             if hasattr(base, '__mro__'):
                 for c in base.__mro__:
-                    if c in (_Base, _NoInstanceDictionaryBase, object):
+                    if c in (BasePy, NoInstanceDictionaryBasePy, object):
                         continue
                     if c in mro:
                         continue
@@ -194,10 +195,10 @@ class ExtensionClass(type):
             else: # pragma: no cover (python 2 only)
                 _add_classic_mro(mro, base)
 
-        if _NoInstanceDictionaryBase in self.__bases__:
-            mro.append(_NoInstanceDictionaryBase)
+        if NoInstanceDictionaryBasePy in self.__bases__:
+            mro.append(NoInstanceDictionaryBasePy)
         elif self.__name__ != 'Base':
-            mro.append(_Base)
+            mro.append(BasePy)
         mro.append(object)
         return mro
 
@@ -222,39 +223,57 @@ class ExtensionClass(type):
 # hierarchy. This means the Base_* methods effectively don't have
 # to care or worry about using super(): it's always object.
 
-def Base_getattro(self, name):
-    descr = None
+def Base_getattro(self, name, _marker=object()):
+    descr = marker = _marker
 
+    # XXX: Why is this looping manually? The C code uses ``_PyType_Lookup``,
+    # which is an internal function, but equivalent to ``getattr(type(self), name)``.
     for base in type(self).__mro__:
         if name in base.__dict__:
             descr = base.__dict__[name]
             break
 
-    if descr is not None and inspect.isdatadescriptor(descr):
+    # A data descriptor in the type has full control.
+    if descr is not marker and inspect.isdatadescriptor(descr):
         return descr.__get__(self, type(self))
 
+    # descr either wasn't defined, or it's not a data descriptor.
     try:
         # Don't do self.__dict__ otherwise you get recursion.
+        # Not all instances will have dictionaries.
         inst_dict = object.__getattribute__(self, '__dict__')
     except AttributeError:
         pass
     else:
-        if name in inst_dict:
+        try:
             descr = inst_dict[name]
-            # If the tp_descr_get of res is of_get, then call it.
-            if name == '__parent__' or not isinstance(descr, Base):
+        except KeyError:
+            pass
+        else:
+            # If the tp_descr_get of res is of_get, then call it,
+            # unless it is __parent__ --- we don't want to wrap that.
+            # XXX: This isn't quite what the C implementation does. It actually
+            # checks the get function. Here we test the type.
+            if name == '__parent__' or not isinstance(descr, BasePy):
                 return descr
 
-    if descr is not None:
-        descr_get = getattr(descr, '__get__', None)
-        if descr_get is None:
+    # Here, descr could be either a non-data descriptor
+    # from the class dictionary, or *any* kind of object
+    # from the instance dictionary. Unlike the way normal
+    # Python classes handle non-data descriptors, we will invoke
+    # __get__ even if it was found in the instance dictionary.
+    if descr is not marker:
+        try:
+            descr_get = descr.__get__
+        except AttributeError:
             return descr
 
         return descr_get(self, type(self))
 
     raise AttributeError(
-            "'%.50s' object has not attribute '%s'",
-            type(self).__name__, name)
+        "'%.50s' object has no attribute '%s'" % (
+            type(self).__name__, name
+        ))
 
 
 def _slotnames(self):
@@ -321,15 +340,16 @@ Base = ExtensionClass("Base", (object, ), {
     '__new__': Base__new__,
 })
 
-_Base = Base
+
 
 
 class NoInstanceDictionaryBase(Base):
     __slots__ = ()
 
 
-_NoInstanceDictionaryBase = NoInstanceDictionaryBase
-
+BasePy = Base
+ExtensionClassPy = ExtensionClass
+NoInstanceDictionaryBasePy = NoInstanceDictionaryBase
 
 if C_EXTENSION:  # pragma no cover
     from ._ExtensionClass import *  # NOQA
