@@ -4,7 +4,7 @@ Changelog
 4.5 (unreleased)
 ----------------
 
-- Drop support for Python 3.4.
+- Drop support for Python 3.4 and 3.5
 
 - Add support for Python 3.8 and 3.9.
 
