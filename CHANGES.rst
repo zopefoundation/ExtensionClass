@@ -7,7 +7,7 @@
 
 - Drop support for Python 3.4.
 
-- Add support for Python 3.8.
+- Add support for Python 3.8 and 3.9.
 
 - Fix accessing ``__parent__`` when it is defined as a class attribute
   that is ``None`` (e.g., in subclasses of

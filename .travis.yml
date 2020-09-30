@@ -5,11 +5,14 @@ python:
     - 3.6
     - 3.7
     - 3.8
+    - 3.9-dev
     - pypy
     - pypy3
 jobs:
     include:
         - python: "3.7"
+          env: PURE_PYTHON=1
+        - python: "2.7"
           env: PURE_PYTHON=1
 install:
     - pip install -U pip setuptools
