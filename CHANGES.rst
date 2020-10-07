@@ -2,7 +2,7 @@
  Changelog
 ===========
 
-4.5.0 (unreleased)
+4.5.0 (2020-10-07)
 ==================
 
 - Drop support for Python 3.4.
