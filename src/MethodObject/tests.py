@@ -21,7 +21,7 @@ class TestMethodObject(unittest.TestCase):
         from ExtensionClass import _IS_PYPY
         try:
             from MethodObject import _MethodObject
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             self.assertTrue(_IS_PYPY)
         else:
             self.assertTrue(hasattr(_MethodObject, 'Method'))
@@ -46,6 +46,7 @@ class TestMethodObject(unittest.TestCase):
 
         self.assertEqual(result,
                          ("bar()", (1, 2, 3), {'name': 'spam'}))
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

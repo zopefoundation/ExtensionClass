@@ -174,9 +174,12 @@ class TestNoInstanceDictionaryBasePy(TestNoInstanceDictionaryBase):
         return NoInstanceDictionaryBasePy
 
     def test_subclass_has_no_dict(self):
-        B = super(TestNoInstanceDictionaryBasePy, self).test_subclass_has_no_dict()
+        B = super(
+            TestNoInstanceDictionaryBasePy,
+            self).test_subclass_has_no_dict()
         # In Python, we implement this by adding an empty __slots__
         self.assertEqual(B.__slots__, ())
+
 
 def test__basicnew__():
     """
@@ -863,6 +866,7 @@ def test__init__w_arg():
     <ExtensionClass.Base object at ...>
     """
 
+
 def test__parent__does_not_get_wrapped():
     """
     The issue at
@@ -890,10 +894,11 @@ def test__parent__does_not_get_wrapped():
     b
     """
 
+
 def test_unbound_function_as___class_init___hook():
     """
-    Zope patches an unbound function as a `__class_init__` hook onto `Persistent`;
-    let's make sure that gets called correctly.
+    Zope patches an unbound function as a `__class_init__` hook onto
+    `Persistent`; let's make sure that gets called correctly.
 
     >>> def InitializeClass(cls):
     ...     print('InitializeClass called')
@@ -915,8 +920,9 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
         # application. The fact that Base and object are *always* moved
         # to the end of a given class's mro means that even though
         # the actual implementation of Base.__getattribute__ is non-cooperative
-        # (i.e., in Python, using object.__getattribute__ directly, not super()),
-        # it doesn't matter: everything else in the hierarchy has already been called
+        # (i.e., in Python, using object.__getattribute__ directly, not
+        # super()), it doesn't matter: everything else in the hierarchy has
+        # already been called
         class YouShallNotPass(Exception):
             pass
 
@@ -928,12 +934,15 @@ class TestEffectivelyCooperativeBase(unittest.TestCase):
             pass
 
         # Even though it's declared this way...
-        self.assertEqual(WithBaseAndNoAttributes.__bases__, (Base, NoAttributes))
+        self.assertEqual(WithBaseAndNoAttributes.__bases__,
+                         (Base, NoAttributes))
         # ... the effective value puts base at the end
-        self.assertEqual((Base, object), tuple(WithBaseAndNoAttributes.mro()[-2:]))
+        self.assertEqual((Base, object), tuple(
+            WithBaseAndNoAttributes.mro()[-2:]))
 
         # Therefore, we don't get AttributeError, we get our defined exception
-        self.assertRaises(YouShallNotPass, getattr, WithBaseAndNoAttributes(), 'a')
+        with self.assertRaises(YouShallNotPass):
+            getattr(WithBaseAndNoAttributes(), 'a')
 
 
 class Test_add_classic_mro(unittest.TestCase):
@@ -981,7 +990,6 @@ class Test_add_classic_mro(unittest.TestCase):
         self._callFUT(mro, _Derived)
         self.assertEqual(mro, [_Derived, _One, _Base, object, _Another])
 
-
     def test_w_filled_mro_oldstyle_class_w_bases(self):
 
         class _Base:
@@ -993,9 +1001,8 @@ class Test_add_classic_mro(unittest.TestCase):
         already = object()
         mro = [already]
         self._callFUT(mro, _Derived)
-        self.assertEqual(
-            mro,
-            [already, _Derived, _Base] + ([object] if sys.version_info[0] > 2 else []))
+        self.assertEqual(mro, [already, _Derived, _Base] +
+                         ([object] if sys.version_info[0] > 2 else []))
 
 
 class TestExtensionClass(unittest.TestCase):
@@ -1012,7 +1019,6 @@ class TestExtensionClass(unittest.TestCase):
         else:
             self.assertTrue(hasattr(_ExtensionClass, 'CAPI2'))
 
-
     def test_mro_classic_class(self):
 
         class _Base:
@@ -1021,13 +1027,14 @@ class TestExtensionClass(unittest.TestCase):
         class _Derived(_Base, self._getTargetClass()):
             pass
 
-
-        self.assertEqual(_Derived.__mro__,
-                         (_Derived, _Base, self._getTargetClass(), type, object))
+        self.assertEqual(
+            _Derived.__mro__,
+            (_Derived, _Base, self._getTargetClass(), type, object))
 
     def test_class_init(self):
         class _Derived(self._getTargetClass()):
             init = 0
+
             def __class_init__(cls):
                 cls.init = 1
         Derived = _Derived('Derived', (), {})
@@ -1054,14 +1061,15 @@ class TestBase(unittest.TestCase):
         class Descr(object):
             def __get__(self, inst, klass):
                 return (inst, klass)
+
             def __set__(self, value):
                 "Does nothing, needed to be a data descriptor"
 
-        class O(self._getTargetClass()):
+        class Obj(self._getTargetClass()):
             attr = Descr()
 
-        o = O()
-        self.assertEqual(o.attr, (o, O))
+        obj = Obj()
+        self.assertEqual(obj.attr, (obj, Obj))
 
     def __check_class_attribute(self, name, class_value):
         cls = type('O', (self._getTargetClass(),), {name: class_value})

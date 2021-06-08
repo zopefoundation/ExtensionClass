@@ -97,10 +97,11 @@ class TestComputedAttribute(unittest.TestCase):
         from ExtensionClass import _IS_PYPY
         try:
             from ComputedAttribute import _ComputedAttribute
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             self.assertTrue(_IS_PYPY)
         else:
             self.assertTrue(hasattr(_ComputedAttribute, 'ComputedAttribute'))
+
 
 def test_suite():
     suite = unittest.defaultTestLoader.loadTestsFromName(__name__)
