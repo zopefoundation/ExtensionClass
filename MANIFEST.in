@@ -8,5 +8,6 @@ include appveyor.yml
 include .coveragerc
 
 recursive-include src *.py
+include *.sh
 recursive-include src *.c
 recursive-include src *.h

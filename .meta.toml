@@ -20,6 +20,7 @@ fail-under = 100
 
 [manifest]
 additional-rules = [
+    "include *.sh",
     "recursive-include src *.c",
     "recursive-include src *.h",
     ]
