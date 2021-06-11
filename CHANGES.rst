@@ -5,7 +5,7 @@
 4.5.1 (unreleased)
 ==================
 
-- Create wheels Linux (2010, 2014 and aarch).
+- Create wheels for Linux (2010, 2014 and aarch) and MacOS.
 
 
 4.5.0 (2020-10-07)
