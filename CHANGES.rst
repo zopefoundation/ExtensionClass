@@ -5,7 +5,7 @@
 4.5.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Create wheels Linux (2010, 2014 and aarch).
 
 
 4.5.0 (2020-10-07)
