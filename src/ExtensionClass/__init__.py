@@ -105,11 +105,11 @@ import sys
 
 if sys.version_info > (3, ):
     import copyreg as copy_reg
-else: # pragma: no cover
+else:  # pragma: no cover
     import copy_reg
 
 _IS_PYPY = platform.python_implementation() == 'PyPy'
-_IS_PURE = 'PURE_PYTHON' in os.environ
+_IS_PURE = int(os.environ.get('PURE_PYTHON', '0'))
 C_EXTENSION = not (_IS_PYPY or _IS_PURE)
 
 
@@ -129,14 +129,16 @@ def pmc_init_of(cls):
     else:
         get = getattr(cls, '__get__', None)
         if (get is not None and
-           (get is of_get or getattr(get, '__func__', None) is of_get)):
+                (get is of_get or getattr(get, '__func__', None) is of_get)):
             del cls.__get__
+
 
 pmc_init_of_py = pmc_init_of
 
 BasePy = type('dummy', (), {'__slots__': ()})
 NoInstanceDictionaryBasePy = type('dummy', (), {'__slots__': ()})
 ExtensionClassPy = type('dummy', (), {'__slots__': ()})
+
 
 def _add_classic_mro(mro, cls):
     if cls not in mro:
@@ -153,10 +155,10 @@ class ExtensionClass(type):
         attrs = {} if attrs is None else attrs
         # Make sure we have an ExtensionClass instance as a base
         if (name != 'Base' and
-            not any(isinstance(b, ExtensionClassPy) for b in bases)):
+                not any(isinstance(b, ExtensionClassPy) for b in bases)):
             bases += (BasePy,)
         if ('__slots__' not in attrs and
-            any(issubclass(b, NoInstanceDictionaryBasePy) for b in bases)):
+                any(issubclass(b, NoInstanceDictionaryBasePy) for b in bases)):
             attrs['__slots__'] = ()
 
         cls = type.__new__(cls, name, bases, attrs)
@@ -180,7 +182,6 @@ class ExtensionClass(type):
         """Create a new empty object"""
         return self.__new__(self)
 
-
     def mro(self):
         """Compute an mro using the 'encapsulated base' scheme"""
         mro = [self]
@@ -192,7 +193,7 @@ class ExtensionClass(type):
                     if c in mro:
                         continue
                     mro.append(c)
-            else: # pragma: no cover (python 2 only)
+            else:  # pragma: no cover (python 2 only)
                 _add_classic_mro(mro, base)
 
         if NoInstanceDictionaryBasePy in self.__bases__:
@@ -209,7 +210,7 @@ class ExtensionClass(type):
     def __setattr__(self, name, value):
         if name not in ('__get__', '__doc__', '__of__'):
             if (name.startswith('__') and name.endswith('__') and
-               name.count('_') == 4):
+                    name.count('_') == 4):
                 raise TypeError(
                     "can't set attributes of built-in/extension type '%s.%s' "
                     "if the attribute name begins and ends with __ and "
@@ -227,7 +228,8 @@ def Base_getattro(self, name, _marker=object()):
     descr = marker = _marker
 
     # XXX: Why is this looping manually? The C code uses ``_PyType_Lookup``,
-    # which is an internal function, but equivalent to ``getattr(type(self), name)``.
+    # which is an internal function, but equivalent to ``getattr(type(self),
+    # name)``.
     for base in type(self).__mro__:
         if name in base.__dict__:
             descr = base.__dict__[name]
@@ -307,12 +309,12 @@ def Base__setstate__(self, state):
     """
     try:
         inst_dict, slots = state
-    except:
+    except BaseException:
         inst_dict, slots = state, ()
     idict = getattr(self, '__dict__', None)
     if inst_dict is not None:
         if idict is None:
-            raise TypeError('No instance dict')  # pragma no cover
+            raise TypeError('No instance dict')  # pragma: no cover
         idict.clear()
         idict.update(inst_dict)
     slotnames = _slotnames(self)
@@ -341,8 +343,6 @@ Base = ExtensionClass("Base", (object, ), {
 })
 
 
-
-
 class NoInstanceDictionaryBase(Base):
     __slots__ = ()
 
@@ -351,13 +351,13 @@ BasePy = Base
 ExtensionClassPy = ExtensionClass
 NoInstanceDictionaryBasePy = NoInstanceDictionaryBase
 
-if C_EXTENSION:  # pragma no cover
+if C_EXTENSION:  # pragma: no cover
     from ._ExtensionClass import *  # NOQA
 
 # We always want to get the CAPI2 value (if possible) so that
 # MethodObject and anything else using the PyExtensionClass_Export
 # macro from ExtensionClass.h doesn't break with an AttributeError
 try:
-    from ._ExtensionClass import CAPI2
-except ImportError: # pragma: no cover
+    from ._ExtensionClass import CAPI2  # noqa: F401 import unused
+except ImportError:  # pragma: no cover
     pass
