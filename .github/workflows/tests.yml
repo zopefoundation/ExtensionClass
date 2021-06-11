@@ -265,60 +265,6 @@ jobs:
       with:
         parallel-finished: true
 
-  docs:
-    needs: build-package
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: [3.9]
-        os: [ubuntu-20.04]
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      ###
-      # Caching.
-      # This actually *restores* a cache and schedules a cleanup action
-      # to save the cache. So it must come before the thing we want to use
-      # the cache.
-      ###
-      - name: Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-
-      - name: pip cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Download ExtensionClass wheel
-        uses: actions/download-artifact@v2
-        with:
-          name: ExtensionClass-${{ runner.os }}-${{ matrix.python-version }}.whl
-          path: dist/
-      - name: Install ExtensionClass
-        run: |
-          pip install -U wheel
-          pip install -U coverage
-          pip install -U  "`ls dist/ExtensionClass-*.whl`[docs]"
-          # Until repoze.sphinx.autointerface supports Sphinx 4.x we cannot use it:
-          pip install -U "Sphinx < 4"
-      - name: Build docs
-        env:
-          ZOPE_INTERFACE_STRICT_IRO: 1
-        run: |
-          sphinx-build -b html -d docs/_build/doctrees docs docs/_build/html
-          sphinx-build -b doctest -d docs/_build/doctrees docs docs/_build/doctest
-
-
   lint:
     needs: build-package
     runs-on: ${{ matrix.os }}
