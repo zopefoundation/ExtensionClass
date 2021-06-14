@@ -333,14 +333,16 @@ def Base__new__(cls, *args, **kw):
     return object.__new__(cls)
 
 
-Base = ExtensionClass("Base", (object, ), {
-    '__slots__': (),
-    '__getattribute__': Base_getattro,
-    '__getstate__': Base__getstate__,
-    '__setstate__': Base__setstate__,
-    '__reduce__': Base__reduce__,
-    '__new__': Base__new__,
-})
+# Base = ExtensionClass("Base", (object, ), {
+#     '__slots__': (),
+#     '__getattribute__': Base_getattro,
+#     '__getstate__': Base__getstate__,
+#     '__setstate__': Base__setstate__,
+#     '__reduce__': Base__reduce__,
+#     '__new__': Base__new__,
+# })
+
+Base = object
 
 
 class NoInstanceDictionaryBase(Base):
@@ -351,8 +353,8 @@ BasePy = Base
 ExtensionClassPy = ExtensionClass
 NoInstanceDictionaryBasePy = NoInstanceDictionaryBase
 
-if C_EXTENSION:  # pragma: no cover
-    from ._ExtensionClass import *  # NOQA
+# if C_EXTENSION:  # pragma: no cover
+#     from ._ExtensionClass import *  # NOQA
 
 # We always want to get the CAPI2 value (if possible) so that
 # MethodObject and anything else using the PyExtensionClass_Export
