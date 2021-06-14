@@ -214,8 +214,8 @@ class ExtensionClass(type):
                 raise TypeError(
                     "can't set attributes of built-in/extension type '%s.%s' "
                     "if the attribute name begins and ends with __ and "
-                    "contains only 4 _ characters" %
-                    (self.__module__, self.__name__))
+                    "contains only 4 _ characters (%s)" %
+                    (self.__module__, self.__name__, name))
         return type.__setattr__(self, name, value)
 
 

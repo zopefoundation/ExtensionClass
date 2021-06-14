@@ -18,5 +18,5 @@ class ComputedAttribute(Base):
         return func(inst)
 
 
-if C_EXTENSION:  # pragma no cover
-    from ._ComputedAttribute import *  # NOQA
+# if C_EXTENSION:  # pragma no cover
+#     from ._ComputedAttribute import *  # NOQA

@@ -20,5 +20,5 @@ class Method(Base):
         return MethodType(self, inst)
 
 
-if C_EXTENSION:  # pragma no cover
-    from ._MethodObject import *  # NOQA
+# if C_EXTENSION:  # pragma no cover
+#     from ._MethodObject import *  # NOQA
