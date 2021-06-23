@@ -1122,7 +1122,7 @@ class TestBase(unittest.TestCase):
                 return "A1"
         class A2:
             def f(self):
-                return "A2"  # pragma: no cover
+                return "A2"
         class B1(A1, A2):
             pass
         class B2(A2, A1):
@@ -1137,11 +1137,9 @@ class TestBase(unittest.TestCase):
             class C(B1, B2):
                 pass
             self.assertIs(C.__mro__[-2], Base)
-            self.assertEqual(C().f(), "A1")
         class C(B1, B3):
             pass
         self.assertIs(C.__mro__[-2], Base)
-        self.assertEqual(C().f(), "A1")
 
 
 class TestBasePy(TestBase):

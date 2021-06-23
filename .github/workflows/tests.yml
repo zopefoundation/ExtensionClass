@@ -241,10 +241,6 @@ jobs:
         if: ${{ !startsWith(matrix.python-version, 'pypy') }}
         run: |
           python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
-      - name: Run tests with C3 MRO
-        if: ${{ !startsWith(matrix.python-version, 'pypy') }}
-        run: |
-          EXTENSIONCLASS_C3_MRO=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
       - name: Run tests without C extensions
         run:
           # coverage makes PyPy run about 3x slower!
