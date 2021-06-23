@@ -49,13 +49,3 @@ global-env-vars = [
 build-script = [
     "- python -W ignore setup.py -q bdist_wheel",
     ]
-
-[github-actions]
-additional-config = [
-    "- [\"2.7\",   \"py27-c3\"]",
-    "- [\"3.5\",   \"py35-c3\"]",
-    "- [\"3.6\",   \"py36-c3\"]",
-    "- [\"3.7\",   \"py37-c3\"]",
-    "- [\"3.8\",   \"py38-c3\"]",
-    "- [\"3.9\",   \"py39-c3\"]",
-    ]
