@@ -38,10 +38,13 @@ additional-rules = [
 
 [appveyor]
 global-env-vars = [
+    "# Currently the builds use @dataflake's Appveyor account.  The PyPI token",
+    "# belongs to zope.wheelbuilder, managed by @mgedmin and @dataflake.",
+    "",
     "global:",
-    "  TWINE_USERNAME: zope.wheelbuilder",
+    "  TWINE_USERNAME: __token__",
     "  TWINE_PASSWORD:",
-    "    secure: y/k8TP312tLRATkXU5dq+g==",
+    "    secure: vSlDBj79vziJOA5k3z16r+g2o8qgGdqRpJVY3YveTMjA87uX1OCZ14dtAzko9qt4mUGGnm66Ps3w0me/5dU1ufMR5kSaAhX0g1m1oSkJ/Ti2AyvygqlsMzC7r/atGXSXUrlb7UFz5WKpWedUic7193xIFxG23EFCrxsgQziucw1eQLXebsB4LvmF7wrJy+9LUgTgsvy6B/fc37SRKE+611+H8HVo8SmPVp+dyDyeDX+hpnt5Qhp1kbPCqlJfJoy3CHxX+slUu7ZUS28BUT5vHA==",
     ]
 build-script = [
     "- python -W ignore setup.py -q bdist_wheel",
