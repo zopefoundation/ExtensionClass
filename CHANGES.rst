@@ -5,7 +5,11 @@
 4.5.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Let the envvar ``C3_MRO`` control whether ``ExtensionClass``
+  uses Python's new C3 (Python 2.2+) or the old method resolution order.
+
+- Fix
+  `#33 <https://github.com/zopefoundation/ExtensionClass/issues/33>`_.
 
 
 4.5.1 (2021-06-11)

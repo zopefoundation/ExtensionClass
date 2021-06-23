@@ -451,8 +451,8 @@ _is_bad_setattr_name(PyTypeObject* type, PyObject* as_bytes)
                 PyExc_TypeError,
                 "can't set attributes of built-in/extension type '%s' if the "
                 "attribute name begins and ends with __ and contains only "
-                "4 _ characters",
-                type->tp_name
+                "4 _ characters: %s",
+                type->tp_name, cname
             );
             return 1;
         }
@@ -587,7 +587,7 @@ copy_classic(PyObject *base, PyObject *result)
 static PyObject *
 mro(PyTypeObject *self)
 {
-  /* Compute an MRO for a class */
+  /* Compute a classic MRO for a class */
   PyObject *result, *base, *basemro, *mro=NULL;
   int i, l, err;
 
@@ -642,6 +642,48 @@ mro(PyTypeObject *self)
   Py_DECREF(result);
   return mro;
 }
+
+static PyObject *
+mro_C3(PyTypeObject *self)
+{
+  /* Compute a C3 MRO for a class */
+  PyObject *mro = NULL;
+  PyObject *result = NULL;
+  PyObject *b = NULL; /* borrowed reference */
+  Py_ssize_t i, n;
+  mro = PyObject_GetAttrString((PyObject *) &PyType_Type, "mro");
+  if (mro == NULL)
+    goto end;
+  result = PyObject_CallFunctionObjArgs(mro, (PyObject *)self, NULL);
+  if (result == NULL)
+    goto end;
+  n = PyList_GET_SIZE(result);
+  b = PyList_GetItem(result, n - 2);
+  if (b == NULL)
+    goto cleanup;
+  if (b == (PyObject *) &BaseType)
+    goto end;
+  for (i = 0; i < n - 2; i++) {
+    if (PyList_GET_ITEM(result, i) == (PyObject *) &BaseType)
+      break;
+  }
+  if (i == n - 2) {
+    PyErr_SetString(PyExc_SystemError, "mro does not contain `Base`");
+    goto cleanup;
+  }
+  for (; i < n - 2; i++) {
+    PyList_SET_ITEM(result, i, PyList_GET_ITEM(result, i + 1));
+  }
+  PyList_SET_ITEM(result, n - 2, (PyObject *) &BaseType);
+  goto end;
+
+ cleanup:
+  Py_XDECREF(result); result = NULL;
+ end:
+  Py_XDECREF(mro);
+  return result;
+}
+  
 
 static struct PyMethodDef EC_methods[] = {
   {"__basicnew__", (PyCFunction)__basicnew__, METH_NOARGS, 
@@ -1037,6 +1079,27 @@ module_init(void)
   if (PyModule_AddObject(m, "NoInstanceDictionaryBase",
                          (PyObject *)&NoInstanceDictionaryBaseType) < 0)
       return NULL;
+
+  
+  {
+    /* switch to `mro_C3` */
+    PyObject *ec = NULL, *C3_MRO = NULL;
+    ec = PyImport_ImportModule("ExtensionClass");
+    if (ec == NULL)
+      return NULL;
+    C3_MRO = PyObject_GetAttrString(ec, "_C3_MRO");
+    if (C3_MRO == NULL)
+      return NULL;
+    if (INT_AS_LONG(C3_MRO)) {
+      for (PyMethodDef *d = EC_methods; d->ml_name; d++) {
+	if (strcmp(d->ml_name, "mro") == 0) {
+	  d->ml_meth = (PyCFunction) mro_C3;
+	  break;
+	}
+      }
+    }
+    Py_DECREF(ec); Py_DECREF(C3_MRO);
+  }
 
   return m;
 }

@@ -17,6 +17,7 @@ from doctest import DocTestSuite
 import sys
 import unittest
 
+from ExtensionClass import _C3_MRO as c3_mro
 from ExtensionClass import Base
 from ExtensionClass import ExtensionClass
 
@@ -645,6 +646,11 @@ def test_mro():
        """'ED', 'EB', 'EA', 'EC', 'ND', 'NB', 'NC', 'NA', 'Base', 'object']
     """
 
+if c3_mro:
+    # we would like to use ``unittest.skip`` but
+    # unfortunately, this does not work with doctests
+    del test_mro
+
 
 def test_avoiding___init__decoy_w_inheritedAttribute():
     """
@@ -1090,6 +1096,32 @@ class TestBase(unittest.TestCase):
 
         self.__check_class_attribute('nothing_special', None)
         self.__check_class_attribute('nothing_special', 'not-none')
+
+    def test_mro(self):
+        Base = self._getTargetClass()
+        class A1(Base):
+            def f(self):
+                return "A1"
+        class A2:
+            def f(self):
+                return "A2"
+        class B1(A1, A2):
+            pass
+        class B2(A2, A1):
+            pass
+        class B3(A2, Base):
+            pass
+        if c3_mro:
+            with self.assertRaises(TypeError):
+                class C(B1, B2):
+                    pass
+        else:
+            class C(B1, B2):
+                pass
+            self.assertIs(C.__mro__[-2], Base)
+        class C(B1, B3):
+            pass
+        self.assertIs(C.__mro__[-2], Base)
 
 
 class TestBasePy(TestBase):

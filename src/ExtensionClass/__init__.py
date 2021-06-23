@@ -110,6 +110,7 @@ else:  # pragma: no cover
 
 _IS_PYPY = platform.python_implementation() == 'PyPy'
 _IS_PURE = int(os.environ.get('PURE_PYTHON', '0'))
+_C3_MRO = int(os.environ.get('EXTENSIONCLASS_C3_MRO', '0'))
 C_EXTENSION = not (_IS_PYPY or _IS_PURE)
 
 
@@ -164,7 +165,7 @@ class ExtensionClass(type):
         cls = type.__new__(cls, name, bases, attrs)
 
         # Inherit docstring
-        if not cls.__doc__:
+        if cls.__doc__ is None:
             cls.__doc__ = super(cls, cls).__doc__
 
         # set up __get__ if __of__ is implemented
@@ -182,41 +183,56 @@ class ExtensionClass(type):
         """Create a new empty object"""
         return self.__new__(self)
 
-    def mro(self):
-        """Compute an mro using the 'encapsulated base' scheme"""
-        mro = [self]
-        for base in self.__bases__:
-            if hasattr(base, '__mro__'):
-                for c in base.__mro__:
-                    if c in (BasePy, NoInstanceDictionaryBasePy, object):
-                        continue
-                    if c in mro:
-                        continue
-                    mro.append(c)
-            else:  # pragma: no cover (python 2 only)
-                _add_classic_mro(mro, base)
+    if _C3_MRO:
+        def mro(self):
+            mro = type.mro(self)
+            # ensure `BasePy` is at location `-2`
+            if mro[-2] is not BasePy and (
+                BasePy.__name__ != "dummy"  # initialized
+                ):
+                mro.remove(BasePy)
+                mro[-1:-1] = BasePy,
+            return mro
+    else:
+        def mro(self):
+            """Compute an mro using the 'encapsulated base' scheme"""
+            mro = [self]
+            for base in self.__bases__:
+                if hasattr(base, '__mro__'):
+                    for c in base.__mro__:
+                        if c in (BasePy, NoInstanceDictionaryBasePy, object):
+                            continue
+                        if c in mro:
+                            continue
+                        mro.append(c)
+                else:  # pragma: no cover (python 2 only)
+                    _add_classic_mro(mro, base)
 
-        if NoInstanceDictionaryBasePy in self.__bases__:
-            mro.append(NoInstanceDictionaryBasePy)
-        elif self.__name__ != 'Base':
-            mro.append(BasePy)
-        mro.append(object)
-        return mro
+            if NoInstanceDictionaryBasePy in self.__bases__:
+                mro.append(NoInstanceDictionaryBasePy)
+            elif self.__name__ != 'Base':
+                mro.append(BasePy)
+            mro.append(object)
+            return mro
 
     def inheritedAttribute(self, name):
         """Look up an inherited attribute"""
         return getattr(super(self, self), name)
 
-    def __setattr__(self, name, value):
-        if name not in ('__get__', '__doc__', '__of__'):
-            if (name.startswith('__') and name.endswith('__') and
-                    name.count('_') == 4):
-                raise TypeError(
-                    "can't set attributes of built-in/extension type '%s.%s' "
-                    "if the attribute name begins and ends with __ and "
-                    "contains only 4 _ characters" %
-                    (self.__module__, self.__name__))
-        return type.__setattr__(self, name, value)
+    # The following should emulate `_ExtensionClass.c:EC_setattr`:
+    #   prevent setting attributes looking like slots on **built-in** types
+    #   However, it prevents this generally.
+    #   Eliminate for the moment.
+##    def __setattr__(self, name, value):
+##        if name not in ('__get__', '__doc__', '__of__'):
+##            if (name.startswith('__') and name.endswith('__') and
+##                    name.count('_') == 4):
+##                raise TypeError(
+##                    "can't set attributes of built-in/extension type '%s.%s' "
+##                    "if the attribute name begins and ends with __ and "
+##                    "contains only 4 _ characters: %s" %
+##                    (self.__module__, self.__name__, name))
+##        return type.__setattr__(self, name, value)
 
 
 # Base and object are always moved to the last two positions
