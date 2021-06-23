@@ -1091,7 +1091,8 @@ module_init(void)
     if (C3_MRO == NULL)
       return NULL;
     if (INT_AS_LONG(C3_MRO)) {
-      for (PyMethodDef *d = EC_methods; d->ml_name; d++) {
+      PyMethodDef *d;
+      for (d = EC_methods; d->ml_name; d++) {
 	if (strcmp(d->ml_name, "mro") == 0) {
 	  d->ml_meth = (PyCFunction) mro_C3;
 	  break;
