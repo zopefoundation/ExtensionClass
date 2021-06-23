@@ -5,7 +5,7 @@
 4.5.2 (unreleased)
 ==================
 
-- Let the envvar ``C3_MRO`` control whether ``ExtensionClass``
+- Let the envvar ``EXTENSIONCLASS_C3_MRO`` control whether ``ExtensionClass``
   uses Python's new C3 (Python 2.2+) or the old method resolution order.
 
 - Fix
