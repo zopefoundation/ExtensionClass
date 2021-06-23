@@ -241,12 +241,12 @@ jobs:
       - name: Run tests with C extensions
         if: ${{ !startsWith(matrix.python-version, 'pypy') }}
         env:
-          EXTENSIONCLASS_C3_MRO ${{ matrix.c3 }}
+          EXTENSIONCLASS_C3_MRO: ${{ matrix.c3 }}
         run: |
           python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
       - name: Run tests without C extensions
         env:
-          EXTENSIONCLASS_C3_MRO ${{ matrix.c3 }}
+          EXTENSIONCLASS_C3_MRO: ${{ matrix.c3 }}
         run:
           # coverage makes PyPy run about 3x slower!
           PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
