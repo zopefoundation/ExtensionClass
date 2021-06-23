@@ -22,6 +22,7 @@ from ExtensionClass import Base
 from ExtensionClass import BasePy
 from ExtensionClass import ExtensionClass
 from ExtensionClass import ExtensionClass
+from ExtensionClass import PY3
 
 
 def print_dict(d):
@@ -1129,6 +1130,8 @@ class TestBase(unittest.TestCase):
             pass
         class B3(A2, Base):
             pass
+        self.assertEqual(B1().f(), "A1")
+        self.assertEqual(B2().f(), "A2")
         if c3_mro:
             with self.assertRaises(TypeError):
                 class C(B1, B2):
@@ -1137,9 +1140,11 @@ class TestBase(unittest.TestCase):
             class C(B1, B2):
                 pass
             self.assertIs(C.__mro__[-2], Base)
-        class C(B1, B3):
-            pass
-        self.assertIs(C.__mro__[-2], Base)
+            self.assertEqual(C().f(), "A1")
+        if PY3:
+            class C(B1, B3):
+                pass
+            self.assertIs(C.__mro__[-2], Base)
 
 
 class TestBasePy(TestBase):
