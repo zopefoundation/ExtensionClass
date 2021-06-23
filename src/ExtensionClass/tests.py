@@ -19,6 +19,8 @@ import unittest
 
 from ExtensionClass import _C3_MRO as c3_mro
 from ExtensionClass import Base
+from ExtensionClass import BasePy
+from ExtensionClass import ExtensionClass
 from ExtensionClass import ExtensionClass
 
 
@@ -480,6 +482,22 @@ def test_setattr_on_extension_type():
     1
     0
 
+    """
+
+if Base is not BasePy:
+    # The C implementation does not allow to set some attributes
+    # (those whose name resembles special method names)
+    # on built in types (such as ``Base``).
+    # However, it is difficult for a Python implementation
+    # to determine for which classes the C implementation
+    # would impose this restriction.
+    # Formerly, the Python implementation forbade it generally
+    # (and not only on built in types). This causes problems
+    # with ``AccessControl`` ``__roles__``.
+    # For the moment, the Python implementation does not
+    # impose this restriction at all.
+    # We extend the test here for the C implementation.
+    test_setattr_on_extension_type.__doc__ += """
     >>> Base.__foo__ = 1  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     ...
