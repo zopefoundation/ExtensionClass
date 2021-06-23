@@ -177,6 +177,8 @@ jobs:
     needs: build-package
     runs-on: ${{ matrix.os }}
     strategy:
+      # We want to see all failures:
+      fail-fast: false
       matrix:
         python-version:
           - 2.7
