@@ -105,8 +105,10 @@ import sys
 
 if sys.version_info > (3, ):
     import copyreg as copy_reg
+    PY3 = True
 else:  # pragma: no cover
     import copy_reg
+    PY3 = False
 
 _IS_PYPY = platform.python_implementation() == 'PyPy'
 _IS_PURE = int(os.environ.get('PURE_PYTHON', '0'))

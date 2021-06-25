@@ -177,6 +177,8 @@ jobs:
     needs: build-package
     runs-on: ${{ matrix.os }}
     strategy:
+      # We want to see all failures:
+      fail-fast: false
       matrix:
         python-version:
           - 2.7
@@ -188,6 +190,7 @@ jobs:
           - 3.8
           - 3.9
         os: [ubuntu-20.04, macos-latest]
+        c3: [0, 1]
         exclude:
           - os: macos-latest
             python-version: pypy-2.7
@@ -239,9 +242,13 @@ jobs:
           pip install -U -e .[test]
       - name: Run tests with C extensions
         if: ${{ !startsWith(matrix.python-version, 'pypy') }}
+        env:
+          EXTENSIONCLASS_C3_MRO: ${{ matrix.c3 }}
         run: |
           python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
       - name: Run tests without C extensions
+        env:
+          EXTENSIONCLASS_C3_MRO: ${{ matrix.c3 }}
         run:
           # coverage makes PyPy run about 3x slower!
           PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
