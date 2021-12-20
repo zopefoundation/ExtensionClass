@@ -127,6 +127,7 @@ jobs:
           CIBW_TEST_COMMAND_WINDOWS: >
            python -c "import site; print('--test-path={}'.format(site.getsitepackages()[0].replace('\\', '\\\\')))"
            | xargs zope-testrunner -s ExtensionClass
+      - uses: mxschmitt/action-tmate@v3
       - uses: actions/upload-artifact@v2
         with:
           name: dist
