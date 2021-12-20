@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /*
 
  Copyright (c) 2003 Zope Foundation and Contributors.
@@ -84,9 +86,9 @@ Base_getattro(PyObject *obj, PyObject *name)
 
     f = NULL;
     if (descr != NULL && HAS_TP_DESCR_GET(descr)) {
-        f = descr->ob_type->tp_descr_get;
+        f = Py_TYPE(descr)->tp_descr_get;
         if (f != NULL && PyDescr_IsData(descr)) {
-            res = f(descr, obj, (PyObject *)obj->ob_type);
+            res = f(descr, obj, (PyObject *)Py_TYPE(obj));
             Py_DECREF(descr);
             goto done;
         }
@@ -389,7 +391,7 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   if (self->tp_dict != NULL)
     {
       r = PyDict_GetItemString(self->tp_dict, "__doc__");
-      if ((r == Py_None) && 
+      if ((Py_IsNone(r)) &&
           (PyDict_DelItemString(self->tp_dict, "__doc__") < 0)
           )
         return -1;
@@ -837,7 +839,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           typ->tp_new = ec_new_for_custom_dealloc;
     }
 
-  Py_TYPE(typ) = ECExtensionClassType;
+  Py_SET_TYPE(typ, ECExtensionClassType);
 
   if (ecflags & EXTENSIONCLASS_NOINSTDICT_FLAG)
     typ->tp_base = &NoInstanceDictionaryBaseType;
@@ -982,7 +984,7 @@ module_init(void)
 
   PyExtensionClassCAPI = &TrueExtensionClassCAPI;
 
-  Py_TYPE(&ExtensionClassType) = &PyType_Type;
+  Py_SET_TYPE(&ExtensionClassType, &PyType_Type);
   ExtensionClassType.tp_base = &PyType_Type;
   ExtensionClassType.tp_basicsize = PyType_Type.tp_basicsize;
   ExtensionClassType.tp_traverse = PyType_Type.tp_traverse;
@@ -992,7 +994,7 @@ module_init(void)
   if (PyType_Ready(&ExtensionClassType) < 0)
     return NULL;
 
-  Py_TYPE(&BaseType) = &ExtensionClassType;
+  Py_SET_TYPE(&BaseType, &ExtensionClassType);
   BaseType.tp_base = &PyBaseObject_Type;
   BaseType.tp_basicsize = PyBaseObject_Type.tp_basicsize;
   BaseType.tp_new = PyType_GenericNew;
@@ -1000,7 +1002,7 @@ module_init(void)
   if (PyType_Ready(&BaseType) < 0)
     return NULL;
 
-  Py_TYPE(&NoInstanceDictionaryBaseType) = &ExtensionClassType;
+  Py_SET_TYPE(&NoInstanceDictionaryBaseType, &ExtensionClassType);
   NoInstanceDictionaryBaseType.tp_base = &BaseType;
   NoInstanceDictionaryBaseType.tp_basicsize = BaseType.tp_basicsize;
   NoInstanceDictionaryBaseType.tp_new = PyType_GenericNew;
