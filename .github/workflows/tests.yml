@@ -61,7 +61,7 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
-            echo $PWD
+            echo $(python -c 'import site; print(site.getsitepackages()[0])')
             &&
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
             &&
@@ -101,7 +101,7 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
-            echo $PWD
+            echo $(python -c 'import site; print(site.getsitepackages()[0])')
             &&
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
             &&
