@@ -123,7 +123,7 @@ jobs:
           - "cp310-*"
         arch:
           - x86
-          # - AMD64
+          - AMD64
     steps:
       - uses: actions/checkout@v2
       - uses: pypa/cibuildwheel@v2.3.1
