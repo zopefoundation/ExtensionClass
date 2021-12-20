@@ -52,7 +52,7 @@ jobs:
         with:
           platforms: arm64
       - name: Set env
-        run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $GITHUB_ENV
+        run: echo "TEST_PATH=$HOME/work/ExtensionClass/ExtensionClass/src" >> $GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_BUILD_VERBOSITY: 1
@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set env
-        run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $GITHUB_ENV
+        run: echo "TEST_PATH=$HOME/work/ExtensionClass/ExtensionClass/src" >> $GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_BUILD_VERBOSITY: 1
@@ -101,8 +101,6 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
-            echo $(python -c 'import site; print(site.getsitepackages()[0])')
-            &&
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
             &&
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
@@ -128,7 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set env
-        run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $env:GITHUB_ENV
+        run: echo "TEST_PATH=%userprofile%\work\ExtensionClass\ExtensionClass\src" >> $env:GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_BUILD_VERBOSITY: 1
