@@ -46,10 +46,6 @@ jobs:
           - aarch64
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python[0] }}
       - name: Set up QEMU
         if: matrix.arch == 'aarch64'
         uses: docker/setup-qemu-action@v1
@@ -93,10 +89,6 @@ jobs:
             arch: universal2
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python[0] }}
       - name: Set env
         run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
@@ -111,7 +103,6 @@ jobs:
             &&
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
           CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
-          CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=src"
       - uses: actions/upload-artifact@v2
         with:
           name: dist
@@ -132,10 +123,6 @@ jobs:
           - AMD64
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python[0] }}
       - name: Set env
         run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
@@ -145,7 +132,8 @@ jobs:
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
-          CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=${{ env.TEST_PATH }}"
+          CIBW_TEST_COMMAND_WINDOWS: >
+            zope-testrunner --test-path=${{ env.TEST_PATH }}
       - uses: actions/upload-artifact@v2
         with:
           name: dist
