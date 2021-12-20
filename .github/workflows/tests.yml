@@ -61,6 +61,8 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
+            echo $PWD
+            &&
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
             &&
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
@@ -99,6 +101,8 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
+            echo $PWD
+            &&
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
             &&
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
@@ -133,7 +137,7 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND_WINDOWS: >
-            zope-testrunner --test-path=${{ env.TEST_PATH }}
+            zope-testrunner --test-path=${{ env.TEST_PATH }} -s ExtensionClass
       - uses: actions/upload-artifact@v2
         with:
           name: dist
