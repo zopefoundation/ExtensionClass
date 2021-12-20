@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set env
-        run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $GITHUB_ENV
+        run: echo "TEST_PATH=lib/python${{ matrix.python[0] }}/site-packages" >> $env:GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_BUILD_VERBOSITY: 1
