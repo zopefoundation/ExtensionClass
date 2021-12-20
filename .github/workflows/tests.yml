@@ -125,8 +125,11 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND_WINDOWS: >
-           python -c "import site; print('--test-path={}'.format(site.getsitepackages()[-1]).replace('\\', '\\\\'))"
-           | xargs zope-testrunner -s ExtensionClass
+            python -c "import site; print(site.getsitepackages()[-1])" > path.txt
+            &&
+            set /p TP=<path.txt
+            &&
+            zope-testrunner -s ExtensionClass --test-path=%TP%
       - uses: actions/upload-artifact@v2
         with:
           name: dist
