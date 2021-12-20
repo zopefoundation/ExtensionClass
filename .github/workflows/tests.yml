@@ -129,6 +129,8 @@ jobs:
             &&
             set /p TP=<path.txt
             &&
+            echo %TP%
+            &&
             zope-testrunner -s ExtensionClass --test-path=%TP%
       - uses: actions/upload-artifact@v2
         with:
