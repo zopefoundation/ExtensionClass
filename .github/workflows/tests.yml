@@ -16,7 +16,7 @@ env:
   PIP_NO_PYTHON_VERSION_WARNING: 1
 
 jobs:
-  build-sdist:
+  sdist:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
@@ -31,58 +31,141 @@ jobs:
         name: dist
         path: dist/*.tar.*
 
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  wheels-ubuntu:
+    name: Build on py${{ matrix.python[0] }}-ubuntu-${{ matrix.arch }}
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python:
-          - "cp36-*"
-          - "cp37-*"
-          - "cp38-*"
-          - "cp39-*"
-          - "cp310-*"
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        arch: ["x86_64", "aarch64", "universal2"]
-        exclude:
-          - os: ubuntu-latest
-            cibw_arch: universal2
-          - os: macos-latest
-            cibw_arch: aarch64
-          - os: macos-latest
-            python: "cp37-*"
-            arch: universal2
+          # [Python version, CIBW specifier]
+          - ["3.6",  "cp36-*"]
+          - ["3.10", "cp310-*"]
+        arch:
+          - x86_64
+          - aarch64
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python[0] }}
       - name: Set up QEMU
-        if: matrix.os == 'ubuntu-latest' && matrix.arch == 'aarch64'
+        if: matrix.arch == 'aarch64'
         uses: docker/setup-qemu-action@v1
         with:
           platforms: arm64
+      - name: Set env
+        run: echo "TEST_PATH=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
       - uses: pypa/cibuildwheel@v2.3.1
         env:
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_BUILD: ${{ matrix.python }}
+          CIBW_BUILD: ${{ matrix.python[1] }}
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND: >
-            python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
-            PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+            python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
+            &&
+            PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: wheelhouse/*.whl
+
+  wheels-macos:
+    name: Build on py${{ matrix.python[0] }}-macos-${{ matrix.arch }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          # [Python version, CIBW specifier]
+          - ["3.6",  "cp36-*"]
+          - ["3.10", "cp310-*"]
+        arch:
+          - x86_64
+          - universal2
+        exclude:
+          - python: ["3.6",  "cp36-*"]
+            arch: universal2
+          - python: ["3.7",  "cp37-*"]
+            arch: universal2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python[0] }}
+      - name: Set env
+        run: echo "TEST_PATH=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
+      - uses: pypa/cibuildwheel@v2.3.1
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD: ${{ matrix.python[1] }}
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_TEST_EXTRAS: "test"
+          CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
+          CIBW_TEST_COMMAND: >
+            python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
+            &&
+            PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=${{ env.TEST_PATH }} -v --auto-color
+          CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
           CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=src"
       - uses: actions/upload-artifact@v2
         with:
           name: dist
           path: wheelhouse/*.whl
+
+  wheels-windows:
+    name: Build on py${{ matrix.python[0] }}-windows-${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          # [Python version, CIBW specifier]
+          - ["3.6",  "cp36-*"]
+          - ["3.10", "cp310-*"]
+        arch:
+          - x86
+          - AMD64
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python[0] }}
+      - name: Set env
+        run: echo "TEST_PATH=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
+      - uses: pypa/cibuildwheel@v2.3.1
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD: ${{ matrix.python[1] }}
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_TEST_EXTRAS: "test"
+          CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
+          CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=${{ env.TEST_PATH }}"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: wheelhouse/*.whl
+
   publish:
     name: Publish package to PyPI
+    needs:
+      - sdist
+      - wheels-ubuntu
+      - wheels-macos
+      - wheels-windows
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: dist
           path: dist/
       - run: |
-        ls -al dist/
+          ls -al dist/
       - uses: pypa/gh-action-pypi-publish@v1.4.2
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         with:
