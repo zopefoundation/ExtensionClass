@@ -336,6 +336,9 @@ EC_new(PyTypeObject *self, PyObject *args, PyObject *kw)
               )
             {
               TYPE(result)->tp_dictoffset = 0;
+#ifdef Py_TPFLAGS_MANAGED_DICT
+              TYPE(result)->tp_flags &= ~Py_TPFLAGS_MANAGED_DICT;
+#endif
               break;
             }
         }
