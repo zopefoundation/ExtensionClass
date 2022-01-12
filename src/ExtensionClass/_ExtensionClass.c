@@ -392,7 +392,7 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   if (self->tp_dict != NULL)
     {
       r = PyDict_GetItemString(self->tp_dict, "__doc__");
-      if ((Py_IsNone(r)) &&
+      if ((r == Py_None) &&
           (PyDict_DelItemString(self->tp_dict, "__doc__") < 0)
           )
         return -1;

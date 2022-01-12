@@ -76,13 +76,6 @@ _Py_SET_TYPE(PyObject *ob, PyTypeObject *type)
 #define Py_SET_TYPE(ob, type) _Py_SET_TYPE(_PyObject_CAST(ob), type)
 #endif
 
-#if PY_VERSION_HEX < 0x030A00B1 && !defined(Py_Is)
-#  define Py_Is(x, y) ((x) == (y))
-#endif
-#if PY_VERSION_HEX < 0x030A00B1 && !defined(Py_IsNone)
-#  define Py_IsNone(x) Py_Is(x, Py_None)
-#endif
-
 #ifdef PYTHONCAPI_COMPAT_MSC_INLINE
 #  undef inline
 #  undef PYTHONCAPI_COMPAT_MSC_INLINE
