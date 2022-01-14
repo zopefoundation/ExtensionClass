@@ -5,7 +5,7 @@
 4.5.2 (unreleased)
 ==================
 
-- Add support for Python 3.10.
+- Add support for Python 3.10 and 3.11 (as of alpha 3).
 
 
 4.5.1 (2021-06-11)
