@@ -2,8 +2,8 @@
  Changelog
 ===========
 
-4.5.2 (unreleased)
-==================
+4.6 (unreleased)
+================
 
 - Add support for Python 3.10 and 3.11 (as of alpha 3).
 
