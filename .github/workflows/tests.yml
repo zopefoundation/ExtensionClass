@@ -29,7 +29,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: dist
-        path: dist/*.tar.*      
+        path: dist/*.tar.*
 
   wheels-ubuntu:
     name: Build on ${{ matrix.python}}ubuntu-${{ matrix.arch}}
@@ -150,7 +150,6 @@ jobs:
           - "3.5"
           - "pypy-2.7"
           - "pypy-3.7"
-          - "3.6"
         os: [ubuntu-20.04, macos-latest, windows-latest]
         exclude:
           - os: macos-latest
