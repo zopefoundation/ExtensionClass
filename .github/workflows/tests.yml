@@ -43,6 +43,8 @@ jobs:
           - "cp38-*"
           - "cp39-*"
           - "cp310-*"
+          - "pp37-*"
+          - "pp38-*"
         arch:
           - x86_64
           - aarch64
@@ -81,6 +83,8 @@ jobs:
           - "cp38-*"
           - "cp39-*"
           - "cp310-*"
+          - "pp37-*"
+          - "pp38-*"
         arch:
           - x86_64
           - universal2
@@ -88,6 +92,10 @@ jobs:
           - python: "cp36-*"
             arch: universal2
           - python: "cp37-*"
+            arch: universal2
+          - python: "pp37-*"
+            arch: universal2
+          - python: "pp37-*"
             arch: universal2
     steps:
       - uses: actions/checkout@v2
@@ -121,9 +129,16 @@ jobs:
           - "cp38-*"
           - "cp39-*"
           - "cp310-*"
+          - "pp37-*"
+          - "pp38-*"
         arch:
           - x86
           - AMD64
+        exclude:
+          - python: "pp37-*"
+            arch: x86
+          - python: "pp38-*"
+            arch: x86               
     steps:
       - uses: actions/checkout@v2
       - uses: pypa/cibuildwheel@v2.3.1
