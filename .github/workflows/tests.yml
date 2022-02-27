@@ -179,7 +179,6 @@ jobs:
           # Unzip into src/ so that testrunner can find the .so files
           # when we ask it to load tests from that directory. This
           # might also save some build time?
-          unzip -n dist/ExtensionClass-*whl -d src
           pip install -U -e .[test]
       - name: Run tests with C extensions
         if: ${{ !startsWith(matrix.python-version, 'pypy') }}
@@ -207,6 +206,7 @@ jobs:
       - wheels-ubuntu
       - wheels-macos
       - wheels-windows
+      - non-cibuildwheel-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
