@@ -104,7 +104,8 @@ jobs:
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=`python -c 'import site; print(site.getsitepackages()[0])'` -v --auto-color
           CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
           CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=src"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-art
+      act@v2
         with:
           name: dist
           path: wheelhouse/*.whl
@@ -169,6 +170,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: "Install Visual C++ for Python 2.7"
+        if: runner.os == 'Windows' && ${{ matrix.python-version }} == "2.7"
+        run: |
+          choco install vcpython27 -f -y
       - name: Install ExtensionClass
         run: |
           pip install -U wheel setuptools
@@ -185,9 +190,11 @@ jobs:
         run: |
           python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
       - name: Run tests without C extensions
+        env:
+          PURE_PYTHON: 1
         run:
           # coverage makes PyPy run about 3x slower!
-          PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+          python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
       - name: Report Coverage
         run: |
           coverage combine
