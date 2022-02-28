@@ -134,7 +134,7 @@ jobs:
           CIBW_TEST_EXTRAS: "test"
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND_WINDOWS: >
-            for /f "usebackq tokens=*" %a in (`python -c "import site; import os; print(os.path.abspath(site.getsitepackages()[-1][2:]))"`) do python -c "import ExtensionClass; print(ExtensionClass.__path__)"; zope-testrunner -s ExtensionClass --test-path %a
+            for /f "usebackq tokens=*" %a in (`python -c "import site; import os; print(site.getsitepackages())"`) do python -c "import ExtensionClass; print(ExtensionClass.__path__)"; zope-testrunner -s ExtensionClass --test-path %a
       - uses: actions/upload-artifact@v2
         with:
           name: dist
