@@ -139,6 +139,69 @@ jobs:
         with:
           name: dist
           path: wheelhouse/*.whl
+          
+  non-cibuildwheel-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "2.7"
+          - "3.5"
+          - "pypy-2.7"
+          - "pypy-3.7"
+          - "pypy-3.8"
+        os: [ubuntu-20.04, macos-latest, windows-latest]
+        exclude:
+          - os: macos-latest
+            python-version: "pypy-2.7"
+          - os: macos-latest
+            python-version: "pypy-3.7"
+          - os: macos-latest
+            python-version: "pypy-3.8"
+          - os: macos-latest
+            python-version: "3.5"
+          - os: windows-latest
+            python-version: "2.7"
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install ExtensionClass
+        run: |
+          pip install -U wheel setuptools
+          # coverage has a wheel on PyPI for a future python version which is
+          # not ABI compatible with the current one, so build it from sdist:
+          pip install -U --no-binary :all: coverage
+          pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
+          # Unzip into src/ so that testrunner can find the .so files
+          # when we ask it to load tests from that directory. This
+          # might also save some build time?
+          pip install -U -e .[test]
+      - name: Run tests with C extensions
+        if: ${{ !startsWith(matrix.python-version, 'pypy') }}
+        run: |
+          python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+      - name: Run tests without C extensions
+        env:
+          PURE_PYTHON: 1
+        run:
+          # coverage makes PyPy run about 3x slower!
+          python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+      - name: Report Coverage
+        run: |
+          coverage combine
+          coverage report -i
+      - name: Submit to Coveralls
+        # This is a container action, which only runs on Linux.
+        if: ${{ startsWith(runner.os, 'Linux') }}
+        uses: AndreMiras/coveralls-python-action@develop
+        with:
+          parallel: true
 
   publish:
     name: Publish package to PyPI
@@ -147,6 +210,7 @@ jobs:
       - wheels-ubuntu
       - wheels-macos
       - wheels-windows
+      - non-cibuildwheel-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v2
