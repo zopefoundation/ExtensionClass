@@ -2,10 +2,16 @@
  Changelog
 ===========
 
-4.5.2 (unreleased)
-==================
+4.7 (unreleased)
+================
 
-- Add support for Python 3.10.
+- Nothing changed yet.
+
+
+4.6 (2022-01-14)
+================
+
+- Add support for Python 3.10 and 3.11 (as of alpha 3).
 
 
 4.5.1 (2021-06-11)
