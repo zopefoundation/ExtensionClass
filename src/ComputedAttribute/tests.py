@@ -34,8 +34,8 @@ Except that you can also use computed attributes with instances:
 '0.93'
 """
 
-from doctest import DocTestSuite
 import unittest
+from doctest import DocTestSuite
 
 from ComputedAttribute import ComputedAttribute
 from ExtensionClass import Base

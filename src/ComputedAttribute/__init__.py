@@ -1,5 +1,4 @@
-from ExtensionClass import Base
-from ExtensionClass import C_EXTENSION
+from ExtensionClass import C_EXTENSION, Base
 
 
 class ComputedAttribute(Base):

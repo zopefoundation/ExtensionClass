@@ -15,7 +15,8 @@
 """
 import os
 import platform
-from setuptools import setup, find_packages, Extension
+
+from setuptools import Extension, find_packages, setup
 
 with open('README.rst') as f:
     README = f.read()
