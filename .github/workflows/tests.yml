@@ -153,7 +153,7 @@ jobs:
           python setup.py bdist_wheel
           # Also install it, so that we get dependencies in the (pip) cache.
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
-          pip install .[test]
+          pip install --pre .[test]
 
       - name: Check ExtensionClass build
         run: |
@@ -247,7 +247,7 @@ jobs:
           # when we ask it to load tests from that directory. This
           # might also save some build time?
           unzip -n dist/ExtensionClass-*whl -d src
-          pip install -U -e .[test]
+          pip install --pre -U -e .[test]
       - name: Run tests with C extensions
         if: ${{ !startsWith(matrix.python-version, 'pypy') }}
         run: |

@@ -17,7 +17,8 @@ import sys
 import unittest
 from doctest import DocTestSuite
 
-from ExtensionClass import Base, ExtensionClass
+from ExtensionClass import Base
+from ExtensionClass import ExtensionClass
 
 
 def print_dict(d):

@@ -1,6 +1,7 @@
 from types import MethodType
 
-from ExtensionClass import C_EXTENSION, Base
+from ExtensionClass import C_EXTENSION
+from ExtensionClass import Base
 
 
 class Method(Base):

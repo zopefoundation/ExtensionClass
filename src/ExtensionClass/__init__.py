@@ -103,6 +103,7 @@ import os
 import platform
 import sys
 
+
 if sys.version_info > (3, ):
     import copyreg as copy_reg
 else:  # pragma: no cover
