@@ -13,9 +13,9 @@
 ##############################################################################
 
 
-from doctest import DocTestSuite
 import sys
 import unittest
+from doctest import DocTestSuite
 
 from ExtensionClass import Base
 from ExtensionClass import ExtensionClass
