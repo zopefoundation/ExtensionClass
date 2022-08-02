@@ -5,7 +5,7 @@
 4.7 (unreleased)
 ================
 
-- Nothing changed yet.
+- Update Python 3.11 support to beta 4.
 
 
 4.6 (2022-01-14)
