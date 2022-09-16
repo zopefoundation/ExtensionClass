@@ -2,7 +2,7 @@
  Changelog
 ===========
 
-4.7 (unreleased)
+4.7 (2022-09-16)
 ================
 
 - Update Python 3.11 support to rc2.

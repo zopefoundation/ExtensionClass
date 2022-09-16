@@ -49,7 +49,7 @@ else:
                   include_dirs=['src']),
     ]
 
-version = '4.7.dev0'
+version = '4.7'
 
 setup(
     name='ExtensionClass',
