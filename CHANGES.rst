@@ -5,7 +5,7 @@
 4.7 (unreleased)
 ================
 
-- Update Python 3.11 support to beta 5.
+- Update Python 3.11 support to rc2.
 
 
 4.6 (2022-01-14)
