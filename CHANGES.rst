@@ -5,7 +5,10 @@
 4.7 (unreleased)
 ================
 
-- Update Python 3.11 support to beta 5.
+- Update Python 3.11 support to rc2.
+
+- Disable unsafe math optimizations in C code.
+  (`#55 <https://github.com/zopefoundation/ExtensionClass/pull/55>`_)
 
 
 4.6 (2022-01-14)
