@@ -5,7 +5,7 @@
 4.8 (unreleased)
 ================
 
-- Nothing changed yet.
+- Update Python 3.11 support to the final release.
 
 
 4.7 (2022-09-16)
