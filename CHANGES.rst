@@ -2,7 +2,7 @@
  Changelog
 ===========
 
-4.8 (unreleased)
+4.8 (2022-11-03)
 ================
 
 - Update Python 3.11 support to the final release.
