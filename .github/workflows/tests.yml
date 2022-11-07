@@ -20,13 +20,13 @@ jobs:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
     - name: Build source distribution
       run: |
         python -m pip install -U setuptools wheel pip
         python setup.py sdist
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist/*.tar.*
@@ -48,13 +48,13 @@ jobs:
           - x86_64
           - aarch64
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up QEMU
         if: matrix.arch == 'aarch64'
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
         with:
           platforms: arm64
-      - uses: pypa/cibuildwheel@v2.3.1
+      - uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BUILD: ${{ matrix.python }}
@@ -65,7 +65,7 @@ jobs:
             python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=`python -c 'import site; print(site.getsitepackages()[0])'` -v --auto-color
             &&
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=`python -c 'import site; print(site.getsitepackages()[0])'` -v --auto-color
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: wheelhouse/*.whl
@@ -92,8 +92,8 @@ jobs:
           - python: "cp37-*"
             arch: universal2
     steps:
-      - uses: actions/checkout@v2
-      - uses: pypa/cibuildwheel@v2.3.1
+      - uses: actions/checkout@v3
+      - uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BUILD: ${{ matrix.python }}
@@ -106,7 +106,7 @@ jobs:
             PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner -s ExtensionClass --test-path=`python -c 'import site; print(site.getsitepackages()[0])'` -v --auto-color
           CIBW_TEST_SKIP: "*-macosx_universal2:arm64"
           CIBW_TEST_COMMAND_WINDOWS: "zope-testrunner --test-path=src"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: wheelhouse/*.whl
@@ -128,8 +128,8 @@ jobs:
           - x86
           - AMD64
     steps:
-      - uses: actions/checkout@v2
-      - uses: pypa/cibuildwheel@v2.3.1
+      - uses: actions/checkout@v3
+      - uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BUILD: ${{ matrix.python }}
@@ -138,7 +138,7 @@ jobs:
           CIBW_TEST_REQUIRES: "zope.testrunner coverage coverage-python-version"
           CIBW_TEST_COMMAND_WINDOWS: >
             for /f "usebackq tokens=*" %a in (`python -c "import site; import os; print(os.path.abspath(site.getsitepackages()[-1]))"`) do zope-testrunner -m ExtensionClass --test-path=%a
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: wheelhouse/*.whl
@@ -169,9 +169,9 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install ExtensionClass
@@ -216,13 +216,13 @@ jobs:
       - non-cibuildwheel-tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist/
       - run: |
           ls -al dist/
-      - uses: pypa/gh-action-pypi-publish@v1.4.2
+      - uses: pypa/gh-action-pypi-publish@release/v1
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         with:
           user: __token__
