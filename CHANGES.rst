@@ -5,6 +5,7 @@
 4.9 (unreleased)
 ================
 
+- Start supporting Python 3.12 as of 3.12.0-alpha.1.
 
 4.8 (2022-11-03)
 ================
