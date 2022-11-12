@@ -7,6 +7,9 @@
 
 - Start supporting Python 3.12 as of 3.12.0-alpha.1.
 
+- Add support for building arm64 wheels on macOS.
+
+
 4.8 (2022-11-03)
 ================
 
