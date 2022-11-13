@@ -204,12 +204,12 @@ jobs:
           python setup.py bdist_wheel
 
       - name: Install ExtensionClass and dependencies (3.12.0-alpha.1)
-        if: ${{ startsWith(matrix.python-version, '3.12.0-alpha.1') }}
+        if: matrix.python-version == '3.12.0-alpha.1'
         run: |
           # Install to collect dependencies into the (pip) cache.
           pip install --pre .[test]
       - name: Install ExtensionClass and dependencies
-        if: !${{ startsWith(matrix.python-version, '3.12.0-alpha.1') }}
+        if: !matrix.python-version == '3.12.0-alpha.1'
         run: |
           # Install to collect dependencies into the (pip) cache.
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
