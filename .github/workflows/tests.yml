@@ -155,16 +155,6 @@ jobs:
           pip install -U pip
           pip install -U setuptools wheel twine cffi
 
-      - name: Build ExtensionClass (3.12.0-alpha.1)
-        if: ${{ startsWith(matrix.python-version, '3.12.0-alpha.1') }}
-        run: |
-          # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
-          # output (pip install uses a random temporary directory, making this difficult).
-          python setup.py build_ext -i
-          python setup.py bdist_wheel
-          # Also install it, so that we get dependencies in the (pip) cache.
-          pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
-          pip install --pre .[test]
       - name: Build ExtensionClass (macOS x86_64, Python 3.8+)
         if: >
           startsWith(runner.os, 'Mac')
@@ -182,10 +172,6 @@ jobs:
           # output (pip install uses a random temporary directory, making this difficult).
           python setup.py build_ext -i
           python setup.py bdist_wheel
-          # Also install it, so that we get dependencies in the (pip) cache.
-          pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
-          pip install .[test]
-
       - name: Build ExtensionClass (macOS arm64, Python 3.8+)
         if: >
           startsWith(runner.os, 'Mac')
@@ -203,10 +189,6 @@ jobs:
           # output (pip install uses a random temporary directory, making this difficult).
           python setup.py build_ext -i
           python setup.py bdist_wheel
-          # Also install it, so that we get dependencies in the (pip) cache.
-          pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
-          pip install .[test]
-
       - name: Build ExtensionClass (all other versions)
         if: >
           !startsWith(runner.os, 'Mac')
@@ -220,7 +202,16 @@ jobs:
           # output (pip install uses a random temporary directory, making this difficult).
           python setup.py build_ext -i
           python setup.py bdist_wheel
-          # Also install it, so that we get dependencies in the (pip) cache.
+
+      - name: Install ExtensionClass and dependencies (3.12.0-alpha.1)
+        if: ${{ startsWith(matrix.python-version, '3.12.0-alpha.1') }}
+        run: |
+          # Install to collect dependencies into the (pip) cache.
+          pip install --pre .[test]
+      - name: Install ExtensionClass and dependencies
+        if: !${{ startsWith(matrix.python-version, '3.12.0-alpha.1') }}
+        run: |
+          # Install to collect dependencies into the (pip) cache.
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
           pip install .[test]
 
