@@ -30,7 +30,6 @@ tox_env_map() {
     case $1 in
         *"cp27"*) echo 'py27';;
         *"cp35"*) echo 'py35';;
-        *"cp312"*) echo 'py312';;
         *"cp36"*) echo 'py36';;
         *"cp37"*) echo 'py37';;
         *"cp38"*) echo 'py38';;
@@ -46,20 +45,14 @@ for PYBIN in /opt/python/*/bin; do
     if \
        [[ "${PYBIN}" == *"cp27"* ]] || \
        [[ "${PYBIN}" == *"cp35"* ]] || \
-       [[ "${PYBIN}" == *"cp312"* ]] || \
        [[ "${PYBIN}" == *"cp311"* ]] || \
        [[ "${PYBIN}" == *"cp36"* ]] || \
        [[ "${PYBIN}" == *"cp37"* ]] || \
        [[ "${PYBIN}" == *"cp38"* ]] || \
        [[ "${PYBIN}" == *"cp39"* ]] || \
        [[ "${PYBIN}" == *"cp310"* ]] ; then
-        if [[ "${PYBIN}" == *"cp312"* ]] ; then
-            "${PYBIN}/pip" install --pre -e /io/
-            "${PYBIN}/pip" wheel /io/ --pre -w wheelhouse/
-        else
-            "${PYBIN}/pip" install -e /io/
-            "${PYBIN}/pip" wheel /io/ -w wheelhouse/
-        fi
+        "${PYBIN}/pip" install -e /io/
+        "${PYBIN}/pip" wheel /io/ -w wheelhouse/
         if [ `uname -m` == 'aarch64' ]; then
           cd /io/
           ${PYBIN}/pip install tox
