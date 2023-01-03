@@ -100,7 +100,6 @@ static struct PyMethodDef methods[] = {
   {NULL,		NULL}
 };
 
-#ifdef PY3K
 static struct PyModuleDef moduledef =
 {
     PyModuleDef_HEAD_INIT,
@@ -113,7 +112,6 @@ static struct PyModuleDef moduledef =
     NULL,                                   /* m_clear */
     NULL,                                   /* m_free */
 };
-#endif
 
 
 static PyObject*
@@ -123,14 +121,7 @@ module_init(void)
 
   UNLESS(ExtensionClassImported) return NULL;
   
-#ifdef PY3K
   m = PyModule_Create(&moduledef);
-#else
-  m = Py_InitModule3(
-        "_ComputedAttribute",
-        methods,
-        "Provide Computed Attributes\n\n");
-#endif
 
   if (m == NULL) {
       return NULL;
@@ -146,14 +137,7 @@ module_init(void)
   return m;
 }
 
-#ifdef PY3K
 PyMODINIT_FUNC PyInit__ComputedAttribute(void)
 {
     return module_init();
 }
-#else
-PyMODINIT_FUNC init_ComputedAttribute(void)
-{
-    module_init();
-}
-#endif

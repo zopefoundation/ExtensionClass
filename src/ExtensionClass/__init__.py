@@ -98,16 +98,11 @@ called even when it is retrieved from an instance.
 1
 """
 
+import copyreg as copy_reg
 import inspect
 import os
 import platform
-import sys
 
-
-if sys.version_info > (3, ):
-    import copyreg as copy_reg
-else:  # pragma: no cover
-    import copy_reg
 
 _IS_PYPY = platform.python_implementation() == 'PyPy'
 _IS_PURE = int(os.environ.get('PURE_PYTHON', '0'))
@@ -274,7 +269,7 @@ def Base_getattro(self, name, _marker=object()):
         return descr_get(self, type(self))
 
     raise AttributeError(
-        "'%.50s' object has no attribute '%s'" % (
+        "'{:.50}' object has no attribute '{}'".format(
             type(self).__name__, name
         ))
 
