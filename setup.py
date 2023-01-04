@@ -49,7 +49,7 @@ else:
                   include_dirs=['src']),
     ]
 
-version = '4.10.dev0'
+version = '5.0.dev0'
 
 setup(
     name='ExtensionClass',
@@ -69,11 +69,7 @@ setup(
         "License :: OSI Approved :: Zope Public License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -90,4 +86,5 @@ setup(
             'zope.testrunner',
         ],
     },
+    python_requires='>=3.7',
 )

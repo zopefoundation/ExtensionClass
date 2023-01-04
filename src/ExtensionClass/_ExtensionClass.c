@@ -51,19 +51,6 @@ Base_getattro(PyObject *obj, PyObject *name)
     PyObject **dictptr;
 
     if (!NATIVE_CHECK(name)) {
-#ifndef PY3K
-#ifdef Py_USING_UNICODE
-        /* The Unicode to string conversion is done here because the
-           existing tp_setattro slots expect a string object as name
-           and we wouldn't want to break those. */
-        if (PyUnicode_Check(name)) {
-            name = PyUnicode_AsEncodedString(name, NULL, NULL);
-            if (name == NULL)
-                return NULL;
-        }
-        else
-#endif
-#endif
         {
             PyErr_Format(PyExc_TypeError,
                          "attribute name must be string, not '%.200s'",
@@ -136,15 +123,9 @@ Base_getattro(PyObject *obj, PyObject *name)
         goto done;
     }
 
-#ifdef PY3K
     PyErr_Format(PyExc_AttributeError,
                  "'%.50s' object has no attribute '%U'",
                  tp->tp_name, name);
-#else
-    PyErr_Format(PyExc_AttributeError,
-                 "'%.50s' object has no attribute '%.400s'",
-                 tp->tp_name, PyString_AS_STRING(name));
-#endif
 
   done:
     Py_DECREF(name);
@@ -415,11 +396,9 @@ EC_init(PyTypeObject *self, PyObject *args, PyObject *kw)
   else if (PyMethod_Check(__class_init__)) {
       func = PyMethod_GET_FUNCTION(__class_init__);
   }
-#ifdef PY3K
   else if (PyInstanceMethod_Check(__class_init__)) {
       func = PyInstanceMethod_GET_FUNCTION(__class_init__);
   }
-#endif
 
   if (func == NULL) {
       Py_DECREF(__class_init__);
@@ -864,11 +843,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           m = PyDescr_NewMethod(ECBaseType, pure_methods);
           if (! m)
             return -1;
-          #ifdef PY3K
-            m = PyInstanceMethod_New((PyObject*) m);
-          #else
-            m = PyMethod_New((PyObject *)m, NULL, (PyObject *)ECBaseType);
-          #endif
+          m = PyInstanceMethod_New((PyObject*) m);
           if (! m)
             return -1;
           if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m) 
@@ -918,22 +893,11 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
           return callable;
         }
       else {
-          #ifdef PY3K
             return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
-          #else
-            return PyMethod_New(
-                PyMethod_GET_FUNCTION(callable),
-                inst,
-                PyMethod_GET_CLASS(callable));
-          #endif
       }
     }
   else {
-    #ifdef PY3K
         return PyMethod_New(callable, inst);
-    #else
-        return PyMethod_New(callable, inst, (PyObject*)(ECBaseType));
-    #endif
   }
 }
 
@@ -946,7 +910,6 @@ TrueExtensionClassCAPI = {
   &ExtensionClassType,
 };
 
-#ifdef PY3K
 static struct PyModuleDef moduledef =
 {
     PyModuleDef_HEAD_INIT,
@@ -959,7 +922,6 @@ static struct PyModuleDef moduledef =
     NULL,                                   /* m_clear */
     NULL,                                   /* m_free */
 };
-#endif
 
 static PyObject*
 module_init(void)
@@ -1012,12 +974,7 @@ module_init(void)
     return NULL;
   
   /* Create the module and add the functions */
-#ifdef PY3K
   m = PyModule_Create(&moduledef);
-#else
-  m = Py_InitModule3("_ExtensionClass", ec_methods,
-                     _extensionclass_module_documentation);
-#endif
 
   if (m == NULL)
     return NULL;
@@ -1044,14 +1001,7 @@ module_init(void)
   return m;
 }
 
-#ifdef PY3K
 PyMODINIT_FUNC PyInit__ExtensionClass(void)
 {
     return module_init();
 }
-#else
-PyMODINIT_FUNC init_ExtensionClass(void)
-{
-    module_init();
-}
-#endif
