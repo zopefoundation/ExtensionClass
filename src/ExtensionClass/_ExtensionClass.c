@@ -843,7 +843,7 @@ PyExtensionClass_Export_(PyObject *dict, char *name, PyTypeObject *typ)
           m = PyDescr_NewMethod(ECBaseType, pure_methods);
           if (! m)
             return -1;
-            m = PyInstanceMethod_New((PyObject*) m);
+          m = PyInstanceMethod_New((PyObject*) m);
           if (! m)
             return -1;
           if (PyDict_SetItemString(typ->tp_dict, pure_methods->ml_name, m) 
