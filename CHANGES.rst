@@ -7,6 +7,8 @@
 
 - Drop support for Python 2.7, 3.5, 3.6.
 
+- Fix deprecation warning in tests.
+
 
 4.9 (2022-11-17)
 ================

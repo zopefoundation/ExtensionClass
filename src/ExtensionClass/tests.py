@@ -140,7 +140,7 @@ class TestNoInstanceDictionaryBase(unittest.TestCase):
         from ExtensionClass import NoInstanceDictionaryBase
         return NoInstanceDictionaryBase
 
-    def test_subclass_has_no_dict(self):
+    def _subclass_has_no_dict(self):
         class B(self._getTargetClass()):
             pass
         b = B()
@@ -174,7 +174,7 @@ class TestNoInstanceDictionaryBasePy(TestNoInstanceDictionaryBase):
         return NoInstanceDictionaryBasePy
 
     def test_subclass_has_no_dict(self):
-        B = super().test_subclass_has_no_dict()
+        B = self._subclass_has_no_dict()
         # In Python, we implement this by adding an empty __slots__
         self.assertEqual(B.__slots__, ())
 
