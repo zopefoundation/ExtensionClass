@@ -529,7 +529,7 @@ jobs:
           path: wheelhouse/*whl
           name: manylinux_${{ matrix.image }}_wheels.zip
       - name: Restore pip cache permissions
-        run: sudo chown -R $(whoami) ${{ steps.pip-cache.outputs.dir }}
+        run: sudo chown -R $(whoami) ${{ steps.pip-cache-default.outputs.dir }}
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         if: >
