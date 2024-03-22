@@ -104,7 +104,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13.0-alpha - 3.13.0"
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-20.04, macos-11, windows-latest]
         exclude:
           - os: macos-11
             python-version: "pypy-3.10"
@@ -282,7 +282,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13.0-alpha - 3.13.0"
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-20.04, macos-11, windows-latest]
         exclude:
           - os: macos-11
             python-version: "pypy-3.10"

@@ -6,7 +6,7 @@ commit-id = "f33185d7"
 
 [python]
 with-appveyor = true
-with-windows = false
+with-windows = true
 with-pypy = true
 with-sphinx-doctests = false
 with-future-python = true
