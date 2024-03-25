@@ -364,10 +364,10 @@ jobs:
         with:
           name: ExtensionClass-${{ runner.os }}-${{ matrix.python-version }}.whl
           path: dist/
-      - name: Install ExtensionClass 3.13.0-alpha - 3.13.0 - no Windows
+      - name: Install ExtensionClass 3.13.0-alpha - 3.13.0 ${{ matrix.python-version }}- no Windows
         if: >
           matrix.python-version == '3.13.0-alpha - 3.13.0'
-          && startsWith(runner.os, 'Windows')
+          && !startsWith(runner.os, 'Windows')
         run: |
           pip install -U wheel setuptools
           # cffi will probably have no public release until a beta or even RC
