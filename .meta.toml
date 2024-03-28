@@ -8,7 +8,7 @@ commit-id = "8daa034c"
 with-windows = true
 with-pypy = true
 with-sphinx-doctests = false
-with-future-python = true
+with-future-python = false
 with-macos = false
 with-docs = false
 
