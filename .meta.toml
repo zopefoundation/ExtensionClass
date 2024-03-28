@@ -5,7 +5,6 @@ template = "c-code"
 commit-id = "32bb1a75"
 
 [python]
-with-appveyor = true
 with-windows = true
 with-pypy = true
 with-sphinx-doctests = false
