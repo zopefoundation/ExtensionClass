@@ -151,6 +151,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Install Build Dependencies (3.13.0-alpha - 3.13.0)
+        if: matrix.python-version == '3.13.0-alpha - 3.13.0'
+        run: |
+          pip install -U pip
+          pip install -U setuptools wheel twine cffi
       - name: Install Build Dependencies
         run: |
           pip install -U pip
@@ -195,6 +200,13 @@ jobs:
           python setup.py build_ext -i
           python setup.py bdist_wheel
 
+      - name: Install ExtensionClass and dependencies (3.13.0-alpha - 3.13.0)
+        if: matrix.python-version == '3.13.0-alpha - 3.13.0'
+        run: |
+          # Install to collect dependencies into the (pip) cache.
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          pip install --pre .[test]
       - name: Install ExtensionClass and dependencies
         run: |
           # Install to collect dependencies into the (pip) cache.
@@ -311,6 +323,20 @@ jobs:
         with:
           name: ExtensionClass-${{ runner.os }}-${{ matrix.python-version }}.whl
           path: dist/
+      - name: Install ExtensionClass 3.13.0-alpha - 3.13.0 ${{ matrix.python-version }}
+        if: matrix.python-version == '3.13.0-alpha - 3.13.0'
+        run: |
+          pip install -U wheel setuptools
+          # coverage might have a wheel on PyPI for a future python version which is
+          # not ABI compatible with the current one, so build it from sdist:
+          pip install -U --no-binary :all: coverage
+          # Unzip into src/ so that testrunner can find the .so files
+          # when we ask it to load tests from that directory. This
+          # might also save some build time?
+          unzip -n dist/ExtensionClass-*whl -d src
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          txt pip install --pre -U -e .[test]
       - name: Install ExtensionClass
         run: |
           pip install -U wheel setuptools
