@@ -5,6 +5,8 @@
 5.2 (unreleased)
 ================
 
+- Build Windows wheels on GHA.
+
 
 5.1 (2023-10-05)
 ================
