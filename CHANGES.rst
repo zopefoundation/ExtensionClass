@@ -7,7 +7,7 @@
 
 - Build Windows wheels on GHA.
 
-- Add preliminary support for Python 3.13.
+- Add preliminary support for Python 3.13 as of 3.13b1.
 
 
 5.1 (2023-10-05)
