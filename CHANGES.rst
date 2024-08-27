@@ -2,12 +2,14 @@
  Changelog
 ===========
 
-5.2 (unreleased)
+6.0 (unreleased)
 ================
 
 - Build Windows wheels on GHA.
 
 - Add preliminary support for Python 3.13 as of 3.13b1.
+
+- Drop support for Python 3.7.
 
 
 5.1 (2023-10-05)

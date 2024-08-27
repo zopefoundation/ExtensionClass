@@ -24,7 +24,7 @@ from ExtensionClass import ExtensionClass
 def print_dict(d):
     d = d.items()
     print('{%s}' % (', '.join(
-        [('{!r}: {!r}'.format(k, v)) for (k, v) in sorted(d)]
+        [(f'{k!r}: {v!r}') for (k, v) in sorted(d)]
     )))
 
 
