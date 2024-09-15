@@ -115,6 +115,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -266,6 +267,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -363,6 +365,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
