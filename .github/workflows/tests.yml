@@ -30,7 +30,7 @@
 # native support. It works, but is slow.
 #
 # Another major downside: You can't just re-run the job for one part
-# of the matrix. So if there's a transient test failure that hit, say, 3.8,
+# of the matrix. So if there's a transient test failure that hit, say, 3.11,
 # to get a clean run every version of Python runs again. That's bad.
 # https://github.community/t/ability-to-rerun-just-a-single-job-in-a-workflow/17234/65
 
@@ -97,7 +97,6 @@ jobs:
       matrix:
         python-version:
           - "pypy-3.10"
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -112,6 +111,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -157,12 +158,12 @@ jobs:
         if: matrix.python-version == '3.14'
         run: |
           pip install -U pip
-          pip install -U "setuptools < 74" wheel twine
+          pip install -U "setuptools <= 75.6.0" wheel twine
       - name: Install Build Dependencies
         if: matrix.python-version != '3.14'
         run: |
           pip install -U pip
-          pip install -U "setuptools < 74" wheel twine
+          pip install -U "setuptools <= 75.6.0" wheel twine
 
       - name: Build ExtensionClass (macOS x86_64)
         if: >
@@ -265,7 +266,6 @@ jobs:
       matrix:
         python-version:
           - "pypy-3.10"
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -280,6 +280,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -329,7 +331,7 @@ jobs:
       - name: Install ExtensionClass ${{ matrix.python-version }}
         if: matrix.python-version == '3.14'
         run: |
-          pip install -U wheel "setuptools < 74"
+          pip install -U wheel "setuptools <= 75.6.0"
           # coverage might have a wheel on PyPI for a future python version which is
           # not ABI compatible with the current one, so build it from sdist:
           pip install -U --no-binary :all: coverage[toml]
@@ -343,7 +345,7 @@ jobs:
       - name: Install ExtensionClass
         if: matrix.python-version != '3.14'
         run: |
-          pip install -U wheel "setuptools < 74"
+          pip install -U wheel "setuptools <= 75.6.0"
           pip install -U coverage[toml]
           pip install -U 'cffi; platform_python_implementation == "CPython"'
           # Unzip into src/ so that testrunner can find the .so files
@@ -381,6 +383,76 @@ jobs:
       with:
         parallel-finished: true
 
+  release-check:
+    needs: build-package
+    runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+      ###
+      # Caching.
+      # This actually *restores* a cache and schedules a cleanup action
+      # to save the cache. So it must come before the thing we want to use
+      # the cache.
+      ###
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
+
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
+        uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Download ExtensionClass wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: ExtensionClass-${{ runner.os }}-${{ matrix.python-version }}.whl
+          path: dist/
+      - name: Install ExtensionClass
+        run: |
+          pip install -U wheel
+          pip install -U tox
+          pip install -U  "`ls dist/ExtensionClass-*.whl`[docs]"
+      - name: Run release check
+        env:
+          ZOPE_INTERFACE_STRICT_IRO: 1
+        run: |
+          tox -e release-check
+
   manylinux:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
@@ -393,6 +465,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
