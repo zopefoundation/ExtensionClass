@@ -5,7 +5,10 @@
 6.1 (unreleased)
 ================
 
+- Drop support for Python 3.8.
+
 - Add preliminary support for Python 3.14a2.
+
 
 6.0 (2024-09-17)
 ================
