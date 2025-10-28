@@ -13,7 +13,6 @@
 ##############################################################################
 
 
-import sys
 import unittest
 from doctest import DocTestSuite
 
@@ -999,8 +998,7 @@ class Test_add_classic_mro(unittest.TestCase):
         already = object()
         mro = [already]
         self._callFUT(mro, _Derived)
-        self.assertEqual(mro, [already, _Derived, _Base] +
-                         ([object] if sys.version_info[0] > 2 else []))
+        self.assertEqual(mro, [already, _Derived, _Base, object])
 
 
 class TestExtensionClass(unittest.TestCase):
@@ -1012,6 +1010,7 @@ class TestExtensionClass(unittest.TestCase):
         from ExtensionClass import _IS_PYPY
         try:
             from ExtensionClass import _ExtensionClass
+        # ModuleNotFoundError is not possible here:
         except ImportError:  # pragma: no cover
             self.assertTrue(_IS_PYPY)
         else:
