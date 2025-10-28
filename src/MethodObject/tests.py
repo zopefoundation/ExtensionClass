@@ -21,6 +21,7 @@ class TestMethodObject(unittest.TestCase):
         from ExtensionClass import _IS_PYPY
         try:
             from MethodObject import _MethodObject
+        # ModuleNotFoundError is not possible here:
         except ImportError:  # pragma: no cover
             self.assertTrue(_IS_PYPY)
         else:

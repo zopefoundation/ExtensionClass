@@ -355,5 +355,5 @@ if C_EXTENSION:  # pragma: no cover
 # macro from ExtensionClass.h doesn't break with an AttributeError
 try:
     from ._ExtensionClass import CAPI2  # noqa: F401 import unused
-except ImportError:  # pragma: no cover
+except ModuleNotFoundError:  # pragma: no cover
     pass
