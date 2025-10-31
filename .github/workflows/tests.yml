@@ -454,9 +454,11 @@ jobs:
 
   manylinux:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    runs-on: {{ matrix.os }}
     # We use a matrix to share as much code as possible.
     strategy:
       matrix:
+        python-version: ["3.13"]
         include:
           - os: ubuntu-latest
             image: manylinux2014_x86_64
@@ -464,7 +466,6 @@ jobs:
             image: manylinux2014_i686
           - os: ubuntu-24.04-arm
             image: manylinux2014_aarch64
-    runs-on: {{ matrix.os }}
     steps:
       - name: checkout
         uses: actions/checkout@v5
@@ -498,7 +499,7 @@ jobs:
         if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
           path: ${{ steps.pip-cache-default.outputs.dir }}
-          key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ %(manylinux_python_version)s }}
+          key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -507,7 +508,7 @@ jobs:
         if: ${{ startsWith(runner.os, 'Windows') }}
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
-          key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ %(manylinux_python_version)s }}
+          key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
