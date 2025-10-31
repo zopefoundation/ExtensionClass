@@ -458,14 +458,16 @@ jobs:
     # We use a matrix to share as much code as possible.
     strategy:
       matrix:
-        python-version: ["3.13"]
         include:
           - os: ubuntu-latest
             image: manylinux2014_x86_64
+            python-version: "3.13"
           - os: ubuntu-latest
             image: manylinux2014_i686
+            python-version: "3.13"
           - os: ubuntu-24.04-arm
             image: manylinux2014_aarch64
+            python-version: "3.13"
     steps:
       - name: checkout
         uses: actions/checkout@v5
