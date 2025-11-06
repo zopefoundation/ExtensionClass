@@ -21,10 +21,7 @@ from setuptools import setup
 
 
 # PyPy won't build the extension.
-py_impl = platform.python_implementation
-is_pypy = py_impl() == 'PyPy'
-
-if is_pypy:
+if platform.python_implementation() == 'PyPy':
     ext_modules = []
 else:
     ext_modules = [
@@ -42,4 +39,5 @@ else:
                   include_dirs=['src']),
     ]
 
+# See pyproject.toml for package metadata
 setup(ext_modules=ext_modules)
