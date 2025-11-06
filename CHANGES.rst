@@ -5,7 +5,7 @@
 6.2 (unreleased)
 ================
 
-- Nothing changed yet.
+- Move all supported package metadata into ``pyproject.toml``.
 
 
 6.1 (2025-10-29)

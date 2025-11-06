@@ -9,6 +9,46 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "ExtensionClass"
+version = "6.2.dev0"
+description = "Metaclass for subclassable extension types"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = "ZPL-2.1"
+authors = [
+  { name = "Zope Foundation and contributors", email = "zope-dev@zope.dev" },
+]
+maintainers = [
+  { name = "Plone Foundation and contributors", email = "zope-dev@zope.dev" },
+]
+classifiers = [
+  "Development Status :: 6 - Mature",
+  "Environment :: Web Environment",
+  "Framework :: Zope",
+  "Framework :: Zope :: 5",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["zope.testrunner"]
+
+[project.urls]
+Issues = "https://github.com/zopefoundation/ExtensionClass/issues"
+Source = "https://github.com/zopefoundation/ExtensionClass"
+Changelog = "https://github.com/zopefoundation/ExtensionClass/blob/master/CHANGES.rst"
+
 [tool.coverage.run]
 branch = true
 source = ["ExtensionClass"]
