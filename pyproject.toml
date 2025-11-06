@@ -79,6 +79,3 @@ source = [
     ".tox/*/lib/python*/site-packages/",
     ".tox/pypy*/site-packages/",
 ]
-
-[tool.setuptools.packages.find]
-where = ["src"]
