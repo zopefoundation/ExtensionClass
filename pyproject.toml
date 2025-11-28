@@ -1,6 +1,5 @@
-# 
-# Generated from:
-# https://github.com/zopefoundation/meta/tree/master/config/c-code
+# Generated with zope.meta (https://zopemeta.readthedocs.io/) from:
+# https://github.com/zopefoundation/meta/tree/master/src/zope/meta/c-code
 
 [build-system]
 requires = [
@@ -13,7 +12,6 @@ build-backend = "setuptools.build_meta"
 name = "ExtensionClass"
 version = "6.3.dev0"
 description = "Metaclass for subclassable extension types"
-readme = "README.rst"
 requires-python = ">=3.10"
 license = "ZPL-2.1"
 authors = [
@@ -79,3 +77,6 @@ source = [
     ".tox/*/lib/python*/site-packages/",
     ".tox/pypy*/site-packages/",
 ]
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst", "CHANGES.rst"]}
