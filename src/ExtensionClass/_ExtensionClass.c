@@ -884,17 +884,20 @@ PyECMethod_New_(PyObject *callable, PyObject *inst)
 
   if (PyMethod_Check(callable))
     {
-      if (callable->ob_refcnt == 1)
+#ifndef Py_GIL_DISABLED
+      if (Py_REFCNT(callable) == 1)
         {
+          /* Optimization: reuse the method object when we have exclusive
+             ownership.  Not safe in the free-threaded build because another
+             thread could observe the mutation of im_self. */
           Py_XDECREF(((PyMethodObject*)callable)->im_self);
           Py_INCREF(inst);
           ((PyMethodObject*)callable)->im_self = inst;
           Py_INCREF(callable);
           return callable;
         }
-      else {
-            return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
-      }
+#endif
+      return PyMethod_New(PyMethod_GET_FUNCTION(callable), inst);
     }
   else {
         return PyMethod_New(callable, inst);
