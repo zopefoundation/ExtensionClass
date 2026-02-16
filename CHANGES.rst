@@ -4,6 +4,12 @@ Change log
 6.3 (unreleased)
 ----------------
 
+- Fix compilation on free-threaded Python 3.14t: use ``Py_REFCNT()`` macro
+  instead of direct ``ob_refcnt`` struct access, guard ``im_self`` mutation
+  optimization with ``#ifndef Py_GIL_DISABLED``.
+
+- Add CI testing for free-threaded Python 3.14t (Linux).
+
 
 6.2 (2025-11-16)
 ----------------

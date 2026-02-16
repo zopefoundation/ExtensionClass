@@ -12,6 +12,11 @@ with-future-python = true
 with-macos = false
 with-docs = false
 
+[tox]
+additional-envlist = [
+    "py314t,py314t-pure",
+]
+
 [coverage]
 fail-under = 99.5
 
