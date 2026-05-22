@@ -106,6 +106,16 @@ jobs:
         include:
           - python-version: "3.14t"
             os: ubuntu-latest
+          - python-version: "3.14t"
+            os: macos-latest
+          - python-version: "3.14t"
+            os: windows-latest
+          - python-version: "3.15t"
+            os: ubuntu-latest
+          - python-version: "3.15t"
+            os: macos-latest
+          - python-version: "3.15t"
+            os: windows-latest
 
     steps:
       - name: checkout
@@ -141,8 +151,6 @@ jobs:
         with:
           path: ${{ steps.pip-cache-default.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
 
       - name: pip cache (Windows)
         uses: actions/cache@v5
@@ -150,16 +158,15 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
+
 
       - name: Install Build Dependencies (3.15)
-        if: matrix.python-version == '3.15'
+        if: startsWith(matrix.python-version, '3.15')
         run: |
           pip install -U pip
-          pip install -U "setuptools >= 78.1.1,< 82" wheel twine
+          pip install -U "setuptools >= 78.1.1,< 82" wheel twine cffi pycparser
       - name: Install Build Dependencies
-        if: matrix.python-version != '3.15'
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           pip install -U pip
           pip install -U "setuptools >= 78.1.1,< 82" wheel twine
@@ -208,14 +215,14 @@ jobs:
           python setup.py sdist
 
       - name: Install ExtensionClass and dependencies (3.15)
-        if: matrix.python-version == '3.15'
+        if: startsWith(matrix.python-version, '3.15')
         run: |
           # Install to collect dependencies into the (pip) cache.
           # Use "--pre" here because dependencies with support for this future
           # Python release may only be available as pre-releases
           pip install --pre .[test]
       - name: Install ExtensionClass and dependencies
-        if: matrix.python-version != '3.15'
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           # Install to collect dependencies into the (pip) cache.
           pip install -U pip "setuptools >= 78.1.1,< 82"
@@ -224,6 +231,9 @@ jobs:
       - name: Check ExtensionClass build
         run: |
           ls -l dist
+      - name: Check ExtensionClass build (twine)
+        if: ${{ !endsWith(matrix.python-version, 't') }}
+        run: |
           twine check dist/*
       - name: Upload ExtensionClass wheel (macOS x86_64)
         if: >
@@ -291,6 +301,16 @@ jobs:
         include:
           - python-version: "3.14t"
             os: ubuntu-latest
+          - python-version: "3.14t"
+            os: macos-latest
+          - python-version: "3.14t"
+            os: windows-latest
+          - python-version: "3.15t"
+            os: ubuntu-latest
+          - python-version: "3.15t"
+            os: macos-latest
+          - python-version: "3.15t"
+            os: windows-latest
 
     steps:
       - name: checkout
@@ -326,8 +346,6 @@ jobs:
         with:
           path: ${{ steps.pip-cache-default.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
 
       - name: pip cache (Windows)
         uses: actions/cache@v5
@@ -335,8 +353,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
+
       - name: Download ExtensionClass wheel (Linux/macOS)
         if: "!startsWith(runner.os, 'Windows')"
         uses: actions/download-artifact@v8
@@ -351,7 +368,7 @@ jobs:
           name: ExtensionClass-${{ runner.os }}-${{ matrix.python-version }}-${{ runner.arch }}.whl
           path: dist/
       - name: Install ExtensionClass ${{ matrix.python-version }}
-        if: matrix.python-version == '3.15'
+        if: startsWith(matrix.python-version, '3.15')
         run: |
           pip install -U wheel "setuptools >= 78.1.1,< 82"
           # coverage might have a wheel on PyPI for a future python version which is
@@ -366,7 +383,7 @@ jobs:
           # Python release may only be available as pre-releases
           pip install --pre -e .[test]
       - name: Install ExtensionClass
-        if: matrix.python-version != '3.15'
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           pip install -U wheel "setuptools >= 78.1.1,< 82"
           pip install -U coverage[toml]
@@ -394,7 +411,7 @@ jobs:
       - name: Submit to Coveralls
         # This is a container action, which only runs on Linux.
         if: ${{ startsWith(runner.os, 'Linux') }}
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: coverallsapp/github-action@v2
         with:
           parallel: true
 
@@ -403,7 +420,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@develop
+      uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
 
@@ -449,8 +466,6 @@ jobs:
         with:
           path: ${{ steps.pip-cache-default.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
 
       - name: pip cache (Windows)
         uses: actions/cache@v5
@@ -458,8 +473,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
+
       - name: Download ExtensionClass wheel
         uses: actions/download-artifact@v8
         with:
@@ -526,8 +540,6 @@ jobs:
         with:
           path: ${{ steps.pip-cache-default.outputs.dir }}
           key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
 
       - name: pip cache (Windows)
         uses: actions/cache@v5
@@ -535,8 +547,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
-          restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-pip-
+
 
       - name: Update pip
         run: pip install -U pip
