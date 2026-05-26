@@ -79,5 +79,9 @@ source = [
     ".tox/pypy*/site-packages/",
 ]
 
+[tool.zest-releaser]
+create-wheel = false
+upload-pypi = false
+
 [tool.setuptools.dynamic]
 readme = {file = ["README.rst", "CHANGES.rst"]}
