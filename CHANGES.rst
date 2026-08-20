@@ -4,6 +4,8 @@ Change log
 6.4 (unreleased)
 ----------------
 
+- Add support for Python 3.15.
+
 - Build and upload free-threaded (``cp314t``, ``cp315t``) wheels for all
   platforms. Expand CI testing for free-threaded Python 3.14t from Linux-only
   to all platforms (macOS, Windows), and add 3.15t CI.
