@@ -159,8 +159,10 @@ class ExtensionClass(type):
 
         cls = type.__new__(cls, name, bases, attrs)
 
-        # Inherit docstring
-        if not cls.__doc__:
+        # Inherit docstring, but only if the class doesn't have one of its
+        # own.  An explicit empty docstring ("") is a legitimate docstring
+        # and must not be replaced by the one from a base class.
+        if cls.__doc__ is None:
             cls.__doc__ = super(cls, cls).__doc__
 
         # set up __get__ if __of__ is implemented

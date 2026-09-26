@@ -1088,6 +1088,23 @@ class TestBase(unittest.TestCase):
         self.__check_class_attribute('nothing_special', None)
         self.__check_class_attribute('nothing_special', 'not-none')
 
+    def test_doc_inherited_only_when_missing(self):
+        # A subclass without its own docstring inherits one from its base,
+        # but a subclass with an explicit empty docstring keeps it as is.
+        base = self._getTargetClass()
+
+        class Parent(base):
+            "parent doc"
+
+        class NoDoc(Parent):
+            pass
+
+        class EmptyDoc(Parent):
+            ""
+
+        self.assertEqual(NoDoc.__doc__, 'parent doc')
+        self.assertEqual(EmptyDoc.__doc__, '')
+
 
 class TestBasePy(TestBase):
 

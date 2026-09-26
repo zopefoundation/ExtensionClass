@@ -4,6 +4,11 @@ Change log
 6.5 (unreleased)
 ----------------
 
+- Fix ``PURE_PYTHON`` mode overwriting an explicit empty docstring
+  (``""``) on a class with the docstring inherited from its base
+  class, instead of leaving it as an empty string like the C
+  implementation does.
+
 
 6.4 (2026-08-20)
 ----------------
