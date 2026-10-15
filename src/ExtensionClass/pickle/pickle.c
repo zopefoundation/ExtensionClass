@@ -282,7 +282,7 @@ pickle___setstate__(PyObject *self, PyObject *state)
         Py_ssize_t i;
 
         dict = _PyObject_GetDictPtr(self);
-        
+
         if (!dict)
         {
             PyErr_SetString(PyExc_TypeError,
@@ -405,7 +405,7 @@ convert_name(PyObject *name)
 
 #define PICKLE_SETSTATE_DEF \
 {"__setstate__", (PyCFunction)pickle___setstate__, METH_O,           \
-   pickle___setstate__doc},                                          
+   pickle___setstate__doc},
 
 #define PICKLE_GETNEWARGS_DEF
 

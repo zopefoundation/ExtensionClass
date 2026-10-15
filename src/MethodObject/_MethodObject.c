@@ -28,7 +28,7 @@ of(PyObject *self, PyObject *args)
 }
 
 struct PyMethodDef Method_methods[] = {
-  {"__of__",(PyCFunction)of,METH_VARARGS,""},  
+  {"__of__",(PyCFunction)of,METH_VARARGS,""},
   {NULL,		NULL}		/* sentinel */
 };
 

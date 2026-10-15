@@ -31,9 +31,9 @@ CA__init__(CA *self, PyObject *args)
 
   UNLESS(PyArg_ParseTuple(args,"O|i",&callable, &level)) return NULL;
 
-  if (level > 0) 
+  if (level > 0)
     {
-      callable=PyObject_CallFunction(OBJECT(Py_TYPE(self)), "Oi", 
+      callable=PyObject_CallFunction(OBJECT(Py_TYPE(self)), "Oi",
 				     callable, level-1);
       UNLESS (callable) return NULL;
       self->level=level;
@@ -51,7 +51,7 @@ CA__init__(CA *self, PyObject *args)
 }
 
 static void
-CA_dealloc(CA *self)     
+CA_dealloc(CA *self)
 {
   Py_DECREF(self->callable);
   Py_DECREF(Py_TYPE(self));
@@ -61,7 +61,7 @@ CA_dealloc(CA *self)
 static PyObject *
 CA_of(CA *self, PyObject *args)
 {
-  if (self->level > 0) 
+  if (self->level > 0)
     {
       Py_INCREF(self->callable);
       return self->callable;
@@ -92,7 +92,7 @@ static PyExtensionClass ComputedAttributeType = {
   (destructor)CA_dealloc,
   0,0,0,0,0,   0,0,0,   0,0,0,0,0,   0,0,
   "ComputedAttribute(callable) -- Create a computed attribute",
-  METHOD_CHAIN(CA_methods), 
+  METHOD_CHAIN(CA_methods),
   (void*)(EXTENSIONCLASS_BINDABLE_FLAG)
 };
 
@@ -120,7 +120,7 @@ module_init(void)
   PyObject *m, *d;
 
   UNLESS(ExtensionClassImported) return NULL;
-  
+
   m = PyModule_Create(&moduledef);
 
   if (m == NULL) {
